@@ -1,0 +1,7 @@
+{
+  "name": "Ravinteli Olkkari",
+  "description": "A premium culinary living room experience app featuring reservations, digital menu, event booking, chef hiring, and art gallery integration.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
