@@ -92,7 +92,16 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
   const openForm = (item: any = null) => {
     setEditingItem(item);
-    setFormData(item || { category: 'Food', subcategory: '' });
+    if (item) {
+      // Map snake_case to camelCase for the form if needed, but let's just use what's there
+      setFormData({ ...item });
+    } else {
+      setFormData({
+        category: activeView === 'wine' ? 'Wine' : 'Food',
+        subcategory: '',
+        is_chef_choice: false
+      });
+    }
     setIsFormOpen(true);
   };
 
@@ -143,11 +152,12 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     const table = tableMap[activeView];
     let error;
 
+    // Clean data for saving
     const dataToSave = { ...formData };
-    if (formData.isChefChoice !== undefined) {
-      dataToSave.is_chef_choice = formData.isChefChoice;
-      delete dataToSave.isChefChoice;
-    }
+
+    // Remote internal/unwanted fields
+    delete (dataToSave as any).id;
+    delete (dataToSave as any).created_at;
 
     if (editingItem) {
       const { error: err } = await supabase
@@ -163,10 +173,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     }
 
     if (error) {
-      alert('Error saving: ' + error.message);
+      alert('Error saving to ' + table + ': ' + error.message);
+      console.error('Save error details:', error);
     } else {
       setIsFormOpen(false);
-      // Force refresh of stats and list
+      // Refresh
       const currentView = activeView;
       setActiveView('dashboard');
       setTimeout(() => setActiveView(currentView), 50);
@@ -178,20 +189,20 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div className="bg-card-dark w-full max-w-lg rounded-2xl border border-white/10 p-6 max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-white text-xl font-bold">{editingItem ? 'Edit' : 'Add New'} {activeView}</h3>
+          <h3 className="text-white text-xl font-bold uppercase italic tracking-tight">{editingItem ? 'Edit' : 'Add New'} {activeView}</h3>
           <button onClick={() => setIsFormOpen(false)} className="text-white/50">
             <span className="material-symbols-outlined">close</span>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pb-10">
           <div className="space-y-1">
             <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Name / Title</label>
             <input
               type="text"
               className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
-              value={formData.name || formData.title || formData.customer_name || ''}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value, customer_name: e.target.value })}
+              value={formData.name || formData.title || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value })}
               required
             />
           </div>
@@ -204,7 +215,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
               )}
               <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-2xl h-20 flex flex-col items-center justify-center text-white/30 hover:bg-white/10 transition-colors group">
                 <span className="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">cloud_upload</span>
-                <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Processing File...' : 'Upload Image'}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Processing...' : 'Upload Image'}</span>
                 <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
               </label>
             </div>
@@ -215,7 +226,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
               <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Value / Rate</label>
               <input
                 type="text"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
                 value={formData.price || formData.rate || ''}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value, rate: e.target.value })}
               />
@@ -224,22 +235,25 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             {(activeView === 'menu' || activeView === 'wine') ? (
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
-                <select
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
-                  value={formData.category || (activeView === 'wine' ? 'Wine' : 'Food')}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                >
-                  <option value="Food">Food</option>
-                  <option value="Drinks">Drinks</option>
-                  <option value="Wine">Wine</option>
-                </select>
+                <div className="relative">
+                  <select
+                    className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                    value={formData.category || (activeView === 'wine' ? 'Wine' : 'Food')}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '' })}
+                  >
+                    <option value="Food" className="bg-[#1d1516] text-white">Food</option>
+                    <option value="Drinks" className="bg-[#1d1516] text-white">Drinks</option>
+                    <option value="Wine" className="bg-[#1d1516] text-white">Wine</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                </div>
               </div>
             ) : activeView === 'events' ? (
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Event Date</label>
                 <input
                   type="text"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
                   value={formData.date || ''}
                   placeholder="Oct 31"
                   onChange={(e) => setFormData({ ...formData, date: e.target.value })}
@@ -248,38 +262,79 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             ) : null}
           </div>
 
-          {(activeView === 'menu' || activeView === 'wine') && (
+          {(formData.category === 'Food' || formData.category === 'Wine') && (
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Sub-Category Tag</label>
-              <select
-                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
-                value={formData.subcategory || ''}
-                onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-              >
-                <option value="">None</option>
-                {formData.category === 'Food' && (
-                  <>
-                    <option value="Starters">Starters</option>
-                    <option value="Mains">Mains</option>
-                    <option value="Desserts">Desserts</option>
-                  </>
-                )}
-                {formData.category === 'Wine' && (
-                  <>
-                    <option value="Red">Red</option>
-                    <option value="White">White</option>
-                    <option value="Rose">Rose</option>
-                    <option value="Sparkling">Sparkling</option>
-                  </>
-                )}
-              </select>
+              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Sub-Category Selection</label>
+              <div className="relative">
+                <select
+                  className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                  value={formData.subcategory || ''}
+                  onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+                >
+                  <option value="" className="bg-[#1d1516] text-white">None (Global)</option>
+                  {formData.category === 'Food' && (
+                    <>
+                      <option value="Starters" className="bg-[#1d1516] text-white">Starters</option>
+                      <option value="Mains" className="bg-[#1d1516] text-white">Mains</option>
+                      <option value="Desserts" className="bg-[#1d1516] text-white">Desserts</option>
+                    </>
+                  )}
+                  {formData.category === 'Wine' && (
+                    <>
+                      <option value="Red" className="bg-[#1d1516] text-white">Red Wine</option>
+                      <option value="White" className="bg-[#1d1516] text-white">White Wine</option>
+                      <option value="Rose" className="bg-[#1d1516] text-white">Rosé Wine</option>
+                      <option value="Sparkling" className="bg-[#1d1516] text-white">Sparkling / Champagne</option>
+                    </>
+                  )}
+                </select>
+                <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+              </div>
+            </div>
+          )}
+
+          {activeView === 'menu' && formData.category === 'Food' && (
+            <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+              <input
+                type="checkbox"
+                id="chefchoice"
+                className="size-5 rounded border-white/10 bg-white/5 text-accent-gold focus:ring-accent-gold accent-gold"
+                checked={!!formData.is_chef_choice}
+                onChange={(e) => setFormData({ ...formData, is_chef_choice: e.target.checked })}
+              />
+              <label htmlFor="chefchoice" className="text-xs font-bold uppercase tracking-widest text-white/70">Mark as Chef's Choice</label>
+            </div>
+          )}
+
+          {activeView === 'wine' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Vintage Year</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 2018"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                  value={formData.year || ''}
+                  onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Region</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Bordeaux"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                  value={formData.region || ''}
+                  onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                />
+              </div>
             </div>
           )}
 
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Details & Information</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Description / Notes</label>
             <textarea
-              className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white outline-none h-32 resize-none text-base"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white focus:border-accent-gold outline-none h-32 resize-none text-base"
               value={formData.description || ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             ></textarea>
@@ -290,7 +345,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             disabled={loading || uploading}
             className="w-full bg-accent-gold text-primary font-black h-16 rounded-2xl mt-4 active:scale-95 transition-all disabled:opacity-50 shadow-xl shadow-accent-gold/10 uppercase tracking-widest text-[10px]"
           >
-            {loading ? 'Processing...' : 'Sync with Database'}
+            {loading ? 'Processing...' : 'Sync with Archive'}
           </button>
         </form>
       </div>
@@ -305,7 +360,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       </div>
 
       <div className="flex overflow-x-auto gap-4 px-6 mb-8 no-scrollbar">
-        <div className="flex min-w-[160px] flex-col gap-4 rounded-[2rem] p-6 bg-accent-gold text-primary shadow-2xl relative overflow-hidden group">
+        <div className="flex min-w-[160px] flex-1 flex-col gap-4 rounded-[2rem] p-6 bg-accent-gold text-primary shadow-2xl relative overflow-hidden group">
           <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:scale-110 transition-transform">loyalty</span>
           <span className="material-symbols-outlined text-3xl">loyalty</span>
           <div>
@@ -314,7 +369,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           </div>
         </div>
 
-        <div onClick={() => setActiveView('bookings')} className="flex min-w-[160px] flex-col gap-4 rounded-[2rem] p-6 bg-card-dark border border-white/5 shadow-xl relative overflow-hidden group cursor-pointer active:scale-95 transition-all">
+        <div onClick={() => setActiveView('bookings')} className="flex min-w-[160px] flex-1 flex-col gap-4 rounded-[2rem] p-6 bg-card-dark border border-white/5 shadow-xl relative overflow-hidden group cursor-pointer active:scale-95 transition-all">
           <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 transition-transform text-accent-gold">calendar_today</span>
           <span className="material-symbols-outlined text-3xl text-accent-gold">calendar_today</span>
           <div>
@@ -381,7 +436,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             <div key={item.id} className="flex items-center gap-5 bg-card-dark p-4 rounded-3xl border border-white/5 shadow-md group">
               {item.image ? (
                 <div
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl h-14 w-14 flex-none shadow-inner border border-white/5"
+                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl h-14 w-14 flex-none shadow-inner border border-white/5 transition-transform group-hover:scale-105"
                   style={{ backgroundImage: `url("${item.image}")` }}
                 ></div>
               ) : (
@@ -393,14 +448,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                 <p className="text-white text-sm font-black truncate tracking-wide">{item.name || item.title || item.customer_name}</p>
                 <div className="flex items-center gap-2 mt-0.5">
                   {item.subcategory && <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-accent-gold/20">{item.subcategory}</span>}
-                  <p className="text-white/40 text-[10px] truncate font-medium">{item.description || item.role || item.date}</p>
+                  <p className="text-white/40 text-[10px] truncate font-medium italic">{item.description || item.role || item.date}</p>
                 </div>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openForm(item)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-accent-gold hover:bg-accent-gold/20 transition-all">
+                <button onClick={() => openForm(item)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-accent-gold hover:bg-accent-gold/10 transition-all">
                   <span className="material-symbols-outlined text-[20px]">edit</span>
                 </button>
-                <button onClick={() => handleDelete(item.id)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-red-500 hover:bg-red-500/20 transition-all">
+                <button onClick={() => handleDelete(item.id)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all">
                   <span className="material-symbols-outlined text-[20px]">delete</span>
                 </button>
               </div>
@@ -416,7 +471,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display pb-24 relative overflow-hidden">
         <Header onOpenMenu={onOpenMenu} title="Society Control" />
 
-        <main className="relative z-10 transition-all duration-500">
+        <main className="relative z-10">
           {activeView === 'dashboard' ? renderDashboard() : renderItemsList()}
         </main>
 
