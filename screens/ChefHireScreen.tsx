@@ -6,12 +6,15 @@ import { Header } from '../components/Header';
 import { MemberGate } from '../components/MemberGate';
 import { Navigation } from '../components/Navigation';
 
+import { useAuth } from '../hooks/useAuth';
+
 interface ChefHireScreenProps {
   onOpenMenu: () => void;
 }
 
 const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,8 +27,19 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
   const [inquiryGuests, setInquiryGuests] = useState(2);
   const [inquiryLocation, setInquiryLocation] = useState('');
   const [selectedMenuIds, setSelectedMenuIds] = useState<number[]>([]);
+  const [inquiryMessage, setInquiryMessage] = useState('');
   const [sendingInquiry, setSendingInquiry] = useState(false);
   const [inquirySent, setInquirySent] = useState(false);
+
+  // Pre-fill user data
+  useEffect(() => {
+    if (user) {
+      setInquiryEmail(user.email ?? '');
+      if (user.user_metadata?.full_name) {
+        setInquiryName(user.user_metadata.full_name);
+      }
+    }
+  }, [user]);
 
   useEffect(() => {
     async function fetchData() {
@@ -145,6 +159,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
     setInquiryName('');
     setInquiryEmail('');
     setInquiryLocation('');
+    setInquiryMessage('');
     setSelectedMenuIds([]);
     setInquiryGuests(2);
     setInquiryDate(new Date().toISOString().split('T')[0]);

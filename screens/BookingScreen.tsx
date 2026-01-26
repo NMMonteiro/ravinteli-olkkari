@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { LOGO_URL } from '../constants';
 import { Header } from '../components/Header';
 import { MemberGate } from '../components/MemberGate';
 import { Navigation } from '../components/Navigation';
+import { useAuth } from '../hooks/useAuth';
 
 interface BookingScreenProps {
   onOpenMenu: () => void;
@@ -12,6 +13,7 @@ interface BookingScreenProps {
 
 const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [guests, setGuests] = useState(2);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('18:00');
@@ -20,6 +22,18 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
   const [comments, setComments] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Pre-fill user data if logged in
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email ?? '');
+      // If you have a profile table, you could fetch the name here.
+      // For now, we'll see if full_name is in user_metadata
+      if (user.user_metadata?.full_name) {
+        setName(user.user_metadata.full_name);
+      }
+    }
+  }, [user]);
 
   const handleBooking = async () => {
     if (!name || !email) {
@@ -36,7 +50,8 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
         guests: guests,
         date: date,
         time: time,
-        special_requests: comments
+        special_requests: comments,
+        user_id: user?.id // Link booking to the authenticated user
       }
     ]);
 

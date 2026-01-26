@@ -1,12 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGO_URL } from '../constants';
+import { useAuth } from '../hooks/useAuth';
 
 const WelcomeScreen: React.FC = () => {
     const navigate = useNavigate();
+    const { isMember, loading } = useAuth();
     const [sliderPos, setSliderPos] = useState(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const isDragging = useRef(false);
+
+    // If already logged in, redirect to home
+    useEffect(() => {
+        if (!loading && isMember) {
+            navigate('/home');
+        }
+    }, [isMember, loading, navigate]);
 
     const handleStart = (clientX: number) => {
         isDragging.current = true;
@@ -54,6 +63,8 @@ const WelcomeScreen: React.FC = () => {
         };
     }, []);
 
+    if (loading) return null;
+
     return (
         <div className="relative h-screen w-full overflow-hidden bg-black font-display">
             {/* Background Image */}
@@ -81,7 +92,7 @@ const WelcomeScreen: React.FC = () => {
                 </div>
 
                 <div className="w-full max-w-xs flex flex-col gap-8 items-center">
-                    <p className="text-white italic text-lg opacity-90">Begin your Journey</p>
+                    <p className="text-white italic text-lg opacity-90">{isMember ? 'Welcome Back, Member' : 'Begin your Journey'}</p>
 
                     <div
                         ref={containerRef}

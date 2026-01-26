@@ -1,16 +1,26 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGO_URL } from '../constants';
+import { useAuth } from '../hooks/useAuth';
 
 const SplashScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { isMember, loading } = useAuth();
 
   useEffect(() => {
+    // Wait for the auth state to load before deciding where to go
+    if (loading) return;
+
     const timer = setTimeout(() => {
-      navigate('/welcome');
+      if (isMember) {
+        navigate('/home');
+      } else {
+        navigate('/welcome');
+      }
     }, 3000);
+
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, isMember, loading]);
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-between overflow-hidden px-6 py-12 bg-primary">
