@@ -5,7 +5,6 @@ import { StaffMember, MenuItem } from '../types';
 import { Header } from '../components/Header';
 import { MemberGate } from '../components/MemberGate';
 import { Navigation } from '../components/Navigation';
-
 import { useAuth } from '../hooks/useAuth';
 
 interface ChefHireScreenProps {
@@ -31,6 +30,10 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
   const [sendingInquiry, setSendingInquiry] = useState(false);
   const [inquirySent, setInquirySent] = useState(false);
 
+  // Menu Filtering
+  const [activeMenuCategory, setActiveMenuCategory] = useState<string>('All');
+  const [uniqueCategories, setUniqueCategories] = useState<string[]>(['All']);
+
   // Pre-fill user data
   useEffect(() => {
     if (user) {
@@ -50,7 +53,14 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
       ]);
 
       if (staffRes.data) setStaffList(staffRes.data);
-      if (menuRes.data) setMenuItems(menuRes.data);
+      if (menuRes.data) {
+        const items = menuRes.data;
+        setMenuItems(items);
+
+        // Extract unique categories
+        const cats = Array.from(new Set(items.map((i: any) => i.category || 'Other'))) as string[];
+        setUniqueCategories(['All', ...cats]);
+      }
       setLoading(false);
     }
     fetchData();
@@ -61,6 +71,10 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
+
+  const filteredMenuItems = activeMenuCategory === 'All'
+    ? menuItems
+    : menuItems.filter(item => (item as any).category === activeMenuCategory);
 
   const handleInquiry = async () => {
     if (!inquiryName || !inquiryEmail || !inquiryLocation) {
@@ -167,7 +181,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
 
   return (
     <MemberGate title="Personal Chef Service" description="Exclusive access to our elite culinary team for your private events.">
-      <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
+      <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24 overflow-x-hidden">
         <Header onOpenMenu={onOpenMenu} title="Private Staff" />
 
         <div className="px-6 pt-10 pb-6">
@@ -201,7 +215,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
                     </div>
                     <button
                       onClick={() => setSelectedStaff(staff)}
-                      className="bg-accent-gold text-primary px-6 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all"
+                      className="bg-accent-gold text-primary px-6 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all text-center"
                     >
                       Book Availability
                     </button>
@@ -216,7 +230,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
         {selectedStaff && (
           <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto pt-10">
             <div className="fixed inset-0 bg-background-dark/95 backdrop-blur-md" onClick={() => !sendingInquiry && setSelectedStaff(null)} />
-            <div className="relative w-full max-w-xl bg-card-dark rounded-t-[40px] sm:rounded-[40px] border-t sm:border border-white/10 p-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[90vh] overflow-y-auto no-scrollbar">
+            <div className="relative w-full max-w-xl bg-card-dark rounded-t-[40px] sm:rounded-[40px] border-t sm:border border-white/10 p-8 shadow-2xl animate-in slide-in-from-bottom duration-500 max-h-[90vh] overflow-y-auto no-scrollbar scale-100">
               {inquirySent ? (
                 <div className="py-20 text-center">
                   <div className="size-24 bg-accent-gold/20 rounded-full flex items-center justify-center mx-auto mb-8 border border-accent-gold/40">
@@ -242,11 +256,11 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-2">
                         <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Your Name</label>
-                        <input type="text" value={inquiryName} onChange={(e) => setInquiryName(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-sm outline-none focus:border-accent-gold transition-colors" placeholder="Full Name" />
+                        <input type="text" value={inquiryName} onChange={(e) => setInquiryName(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-base outline-none focus:border-accent-gold transition-colors" placeholder="Full Name" />
                       </div>
                       <div className="flex flex-col gap-2">
                         <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Email Address</label>
-                        <input type="email" value={inquiryEmail} onChange={(e) => setInquiryEmail(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-sm outline-none focus:border-accent-gold transition-colors" placeholder="Your Email" />
+                        <input type="email" value={inquiryEmail} onChange={(e) => setInquiryEmail(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-base outline-none focus:border-accent-gold transition-colors" placeholder="Your Email" />
                       </div>
                     </div>
 
@@ -255,7 +269,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
                       <div className="flex flex-col gap-2">
                         <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Event Date</label>
                         <div className="relative">
-                          <input type="date" value={inquiryDate} onChange={(e) => setInquiryDate(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-sm outline-none focus:border-accent-gold transition-colors bg-white/0" style={{ colorScheme: 'dark' }} />
+                          <input type="date" value={inquiryDate} onChange={(e) => setInquiryDate(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-base outline-none focus:border-accent-gold transition-colors bg-white/0" style={{ colorScheme: 'dark' }} />
                           <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none text-xl">calendar_month</span>
                         </div>
                       </div>
@@ -272,30 +286,46 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
                     {/* Location */}
                     <div className="flex flex-col gap-2">
                       <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Event Location</label>
-                      <input type="text" value={inquiryLocation} onChange={(e) => setInquiryLocation(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 h-14 text-white text-sm outline-none focus:border-accent-gold transition-colors" placeholder="e.g. City Garden Apartment, Helsinki" />
+                      <input type="text" value={inquiryLocation} onChange={(e) => setInquiryLocation(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 h-14 text-white text-base outline-none focus:border-accent-gold transition-colors" placeholder="e.g. City Garden Apartment, Helsinki" />
                     </div>
 
                     {/* Menu Selection */}
                     <div className="flex flex-col gap-3">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Menu Preferences</label>
-                      <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto no-scrollbar pr-1">
-                        {menuItems.map(item => (
+                      <div className="flex items-center justify-between">
+                        <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Menu Selection</label>
+                        <div className="flex gap-2 bg-white/5 p-1 rounded-full overflow-x-auto no-scrollbar max-w-[60%]">
+                          {uniqueCategories.map(cat => (
+                            <button
+                              key={cat}
+                              onClick={() => setActiveMenuCategory(cat)}
+                              className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeMenuCategory === cat ? 'bg-accent-gold text-primary' : 'text-white/40'}`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 gap-2 max-h-[160px] overflow-y-auto no-scrollbar pr-1 bg-primary/10 rounded-2xl p-2 border border-white/5">
+                        {filteredMenuItems.map(item => (
                           <button
                             key={item.id}
                             onClick={() => toggleMenuItem(item.id)}
-                            className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedMenuIds.includes(item.id) ? 'bg-accent-gold/20 border-accent-gold text-accent-gold' : 'bg-primary/10 border-white/5 text-white/40'}`}
+                            className={`flex items-center justify-between p-4 rounded-xl border transition-all text-left ${selectedMenuIds.includes(item.id) ? 'bg-accent-gold/20 border-accent-gold text-accent-gold' : 'bg-transparent border-white/5 text-white/40'}`}
                           >
-                            <span className="text-xs font-bold">{item.name}</span>
+                            <span className="text-xs font-bold leading-tight line-clamp-1">{item.name}</span>
                             {selectedMenuIds.includes(item.id) && <span className="material-symbols-outlined text-sm">check</span>}
                           </button>
                         ))}
+                        {filteredMenuItems.length === 0 && (
+                          <p className="text-center py-4 text-white/20 text-[10px] uppercase tracking-widest font-bold italic">No items in this category</p>
+                        )}
                       </div>
                     </div>
 
                     {/* Message */}
                     <div className="flex flex-col gap-2">
                       <label className="text-[9px] font-black uppercase tracking-widest text-white/40 ml-1">Notes / Preferences</label>
-                      <textarea value={inquiryMessage} onChange={(e) => setInquiryMessage(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-sm outline-none focus:border-accent-gold min-h-[100px] resize-none" placeholder="Dietary restrictions, theme, or special requests..." />
+                      <textarea value={inquiryMessage} onChange={(e) => setInquiryMessage(e.target.value)} className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white text-base outline-none focus:border-accent-gold min-h-[100px] resize-none" placeholder="Dietary restrictions, theme, or special requests..." />
                     </div>
 
                     <button
