@@ -66,7 +66,7 @@ export const STAFF: StaffMember[] = [
     role: 'Head Chef • Mediterranean Fusion',
     description: 'Bringing 15 years of Michelin-star experience to your private kitchen. Expert in seasonal local ingredients and artistic plating.',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAweH9I317Euc7_DzfnMVim7FfWe0TFGGi5960MJ_i2jRnq-66aJ0FjSY3WE02m-j8KYKbcI1GZf1ou9D2sSOuhpf46DpeAbVlkvUZYLhbTsGcElVuueTta0m_rtEqAMfKtKcUFEY1LanbW7sxRS03K_xN-dv9Koj_uLtkorvOwscb0_SSa8bv0amjwFgwM-Tx01fwqahBhKue5x3TQP3sSEDpwlphCaYZh6AN738qftpMuc90_9iCG2BwG_qOOd4ZGVaDO2_6wezE',
-    rate: '$120',
+    rate: '€120',
     badge: 'PREMIUM'
   },
   {
@@ -75,7 +75,7 @@ export const STAFF: StaffMember[] = [
     role: 'Lead Mixologist • Craft Cocktails',
     description: 'Specializing in bespoke infusions and cocktail pairings for high-end dinner parties. Master of mixology storytelling.',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJ5o2g3oVlnDFJfusPvRfB9gGstdw7iOlP4aalls9GpdJ6BdFJWm6peWOK5JaKirv-VJCYsZD5SgjQavqJ2R3eL3iXPHYa9aLWWtqb9F2dz6zoA4Ueta2LeeFOHmAPSi5-KUoJulVm8hy6ITgGlob-RoQeiYVaAVILEjo0N4JtaOlYljj6HB7IrdmSlOHDcCv6WV7fO6XjImaqpHJA-dRJbYzn_GifFBxqIL3xl1poGv-vT-X7AzuH9mXMFPd_aqLXB0D9gef1740',
-    rate: '$85',
+    rate: '€85',
     badge: 'FEATURED'
   }
 ];

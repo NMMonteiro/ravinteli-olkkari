@@ -28,6 +28,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
     }
 
     setLoading(true);
+
     const { error } = await supabase.from('bookings').insert([
       {
         customer_name: name,
@@ -43,6 +44,67 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
       console.error('Booking error:', error);
       alert('Something went wrong. Please try again.');
     } else {
+      // Send notification to the restaurant
+      const bookingHtml = `
+        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #C5A059; border-radius: 12px; overflow: hidden;">
+          <div style="background-color: #502025; padding: 20px; text-align: center;">
+            <h1 style="color: #C5A059; margin: 0;">New Reservation Request</h1>
+          </div>
+          <div style="padding: 30px; background-color: #fff;">
+            <p><strong>A new booking inquiry has been received:</strong></p>
+            <ul style="list-style: none; padding: 0;">
+              <li style="margin-bottom: 10px;">👤 <strong>Customer:</strong> ${name} (${email})</li>
+              <li style="margin-bottom: 10px;">📅 <strong>Date:</strong> ${date}</li>
+              <li style="margin-bottom: 10px;">⏰ <strong>Time:</strong> ${time}</li>
+              <li style="margin-bottom: 10px;">👥 <strong>Guests:</strong> ${guests}</li>
+            </ul>
+            ${comments ? `<p><strong>Special Requests:</strong> ${comments}</p>` : ''}
+            <p style="margin-top: 30px; font-size: 12px; color: #666;">Sent from Olkkari Society App</p>
+          </div>
+        </div>
+      `;
+
+      try {
+        const { data, error: emailError } = await supabase.functions.invoke('onesignal-email', {
+          body: {
+            email: 'ps.olkkari@gmail.com', // Notification address
+            subject: `New Request: ${name} - ${date} @ ${time}`,
+            body: bookingHtml,
+            name: "Internal Notification"
+          }
+        });
+
+        // Also send a shorter confirmation to the customer
+        const customerHtml = `
+          <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #C5A059; border-radius: 12px; overflow: hidden;">
+            <div style="background-color: #502025; padding: 20px; text-align: center;">
+              <h1 style="color: #C5A059; margin: 0;">Olkkari Reservation</h1>
+            </div>
+            <div style="padding: 30px; background-color: #fff;">
+              <p>Dear ${name},</p>
+              <p>We have received your reservation request for <strong>${date} at ${time}</strong>.</p>
+              <p>Our team is reviewing the availability and will get back to you shortly.</p>
+              <div style="margin-top: 30px; padding: 20px; background-color: #f8f6f6; border-radius: 8px; border-left: 4px solid #C5A059;">
+                <p style="margin: 0; font-weight: bold; color: #502025;">⚠️ Important:</p>
+                <p style="margin: 5px 0 0 0; font-size: 14px;">Please note that your reservation is <strong>not confirmed</strong> until you receive a direct reply from our staff.</p>
+              </div>
+              <p style="margin-top: 30px;">Warmly,<br/>The Olkkari Team</p>
+            </div>
+          </div>
+        `;
+
+        await supabase.functions.invoke('onesignal-email', {
+          body: {
+            email: email,
+            subject: `Reservation Inquiry - Ravinteli Olkkari`,
+            body: customerHtml,
+            name: "Customer Confirmation"
+          }
+        });
+      } catch (err) {
+        console.error('Email error:', err);
+      }
+
       setSubmitted(true);
     }
     setLoading(false);
@@ -52,10 +114,16 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
     return (
       <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display flex flex-col items-center justify-center p-6 text-center">
         <div className="size-20 bg-accent-gold/20 rounded-full flex items-center justify-center mb-6">
-          <span className="material-symbols-outlined text-accent-gold text-4xl">check_circle</span>
+          <span className="material-symbols-outlined text-accent-gold text-4xl animate-bounce">mark_email_read</span>
         </div>
-        <h2 className="text-3xl font-bold mb-2">Table Reserved!</h2>
-        <p className="text-white/60 mb-8 font-medium">We've sent a confirmation to {email}.<br />See you on {date} at {time}!</p>
+        <h2 className="text-3xl font-bold mb-2">Request Sent!</h2>
+        <p className="text-white font-medium mb-4">We've received your inquiry for<br />{date} at {time}.</p>
+        <div className="bg-primary/20 border border-accent-gold/30 p-4 rounded-xl mb-8">
+          <p className="text-accent-gold text-sm font-bold uppercase tracking-widest mb-1">⚠️ Please Note</p>
+          <p className="text-white/80 text-xs leading-relaxed">
+            Your reservation is <span className="text-accent-gold font-bold">not confirmed</span> until our team contacts you with a final confirmation.
+          </p>
+        </div>
         <button
           onClick={() => navigate('/home')}
           className="w-full bg-accent-gold text-primary font-bold py-4 rounded-xl shadow-lg shadow-accent-gold/20 hover:opacity-90 transition-all uppercase tracking-widest"
