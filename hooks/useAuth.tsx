@@ -47,7 +47,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Simple admin check: if email is owners or has special metadata
         // In a real app, this would check a 'roles' table or custom claims
-        const isUserAdmin = currentUser?.email === 'ps.olkkari@gmail.com' || currentUser?.user_metadata?.role === 'admin';
+        const adminEmails = [
+            'ps.olkkari@gmail.com',
+            'zanebiske@gmail.com',
+            'nuno@learnmera.com',
+            'nunommonteiro1972@gmail.com'
+        ];
+        const isUserAdmin = adminEmails.includes(currentUser?.email || '') || currentUser?.user_metadata?.role === 'admin';
         setIsAdmin(isUserAdmin);
 
         setLoading(false);
