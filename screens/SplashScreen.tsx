@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 
 const SplashScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { isMember, loading } = useAuth();
+  const { isMember, loading, user } = useAuth();
 
   useEffect(() => {
     // Wait for the auth state to load before deciding where to go
@@ -13,7 +13,11 @@ const SplashScreen: React.FC = () => {
 
     const timer = setTimeout(() => {
       if (isMember) {
-        navigate('/home');
+        if (user?.user_metadata?.onboarding_complete) {
+          navigate('/home');
+        } else {
+          navigate('/onboarding');
+        }
       } else {
         navigate('/welcome');
       }

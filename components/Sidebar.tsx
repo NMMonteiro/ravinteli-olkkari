@@ -18,6 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { label: 'Hire a Chef', icon: 'chef_hat', path: '/chef' },
         { label: 'Booking', icon: 'calendar_today', path: '/booking' },
         { label: 'Loyalty', icon: 'stars', path: '/loyalty' },
+        { label: 'Profile', icon: 'person', path: '/profile' },
         { label: 'Admin', icon: 'admin_panel_settings', path: '/admin' },
     ];
 

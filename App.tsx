@@ -15,6 +15,8 @@ import AdminScreen from './screens/AdminScreen';
 import ChatScreen from './screens/ChatScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
 import LoginScreen from './screens/LoginScreen';
+import OnboardingScreen from './screens/OnboardingScreen';
+import ProfileScreen from './screens/ProfileScreen';
 import { Sidebar } from './components/Sidebar';
 import { ChatWidget } from './components/ChatWidget';
 
@@ -58,6 +60,8 @@ const AnimatedRoutes = () => {
             <Route path="/chef" element={<ChefHireScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
             <Route path="/gallery" element={<GalleryScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
             <Route path="/loyalty" element={<LoyaltyScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/profile" element={<ProfileScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/onboarding" element={<OnboardingScreen />} />
             <Route path="/admin" element={<AdminScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
             <Route path="/chat" element={<ChatScreen />} />
           </Routes>
