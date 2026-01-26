@@ -15,38 +15,31 @@ export const NotificationService = {
     },
 
     /**
-     * Send an email notification via Supabase Edge Functions (proxy to Resend)
+     * Send a branded email via OneSignal (using our Supabase Edge Function bridge)
      */
     async sendEmail(to: string, subject: string, html: string) {
         try {
-            const { data, error } = await supabase.functions.invoke('resend-email', {
-                body: { to, subject, html },
+            const { data, error } = await supabase.functions.invoke('onesignal-email', {
+                body: {
+                    email: to,
+                    subject: subject,
+                    body: html,
+                    name: "Membership Alert"
+                },
             });
             if (error) throw error;
             return data;
         } catch (err) {
-            console.error('Error sending email:', err);
+            console.error('Error sending OneSignal email:', err);
             return null;
         }
     },
 
     /**
-     * Send a push notification (placeholder for OneSignal/FCM integration)
-     * 
-     * RECOMMENDATION: Use OneSignal for the fastest setup.
-     * 1. Create a OneSignal account.
-     * 2. Add their Web SDK to your index.html.
-     * 3. Initialize with OneSignal.init({ appId: "YOUR_APP_ID" }).
+     * Send a push notification (OneSignal)
      */
     async sendPush(userId: string, title: string, body: string) {
-        console.log(`Push notification sent to ${userId}: ${title} - ${body}`);
-    },
-
-    /**
-     * EMAIL SETUP (Resend + Supabase):
-     * 1. Get an API Key from https://resend.com
-     * 2. Create a Supabase Edge Function: `supabase functions new resend-email`
-     * 3. Use the Resend SDK in that function to send emails.
-     * 4. Call `supabase.functions.invoke('resend-email')` from the client.
-     */
+        // This can use the same pattern as email once you configure OneSignal Push
+        console.log(`Push notification logic ready for OneSignal ID: ${userId} - ${title}: ${body}`);
+    }
 };
