@@ -147,7 +147,14 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                   <div key={item.id} className="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-primary/20 p-4 shadow-sm border border-primary/10 dark:border-white/5 active:scale-[0.98] transition-transform">
                     <div className="flex flex-[2_2_0px] flex-col gap-3">
                       <div className="flex flex-col gap-1">
-                        <p className="text-accent-gold text-sm font-bold leading-normal">{item.price}</p>
+                        <div className="flex justify-between items-start gap-2">
+                          <p className="text-accent-gold text-sm font-bold leading-normal">{item.price}</p>
+                          {item.subcategory && (
+                            <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20">
+                              {item.subcategory}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-primary dark:text-white text-lg font-bold leading-tight">{item.name}</p>
                         <p className="text-gray-600 dark:text-warm-ivory text-sm font-normal leading-relaxed">{item.description}</p>
                       </div>
