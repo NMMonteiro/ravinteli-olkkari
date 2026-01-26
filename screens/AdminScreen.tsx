@@ -4,6 +4,8 @@ import { LOGO_URL } from '../constants';
 import { supabase } from '../supabase';
 import { Header } from '../components/Header';
 import { MemberGate } from '../components/MemberGate';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 type AdminView = 'dashboard' | 'menu' | 'wine' | 'staff' | 'events' | 'art' | 'bookings';
 
@@ -12,6 +14,8 @@ interface AdminScreenProps {
 }
 
 const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
+  const navigate = useNavigate();
+  const { signOut, user } = useAuth();
   const [activeView, setActiveView] = useState<AdminView>('dashboard');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -76,6 +80,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     else setItems(items.filter(item => item.id !== id));
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/welcome');
+  };
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
@@ -134,11 +143,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     const table = tableMap[activeView];
     let error;
 
-    // Remove client-only naming helpers before save
     const dataToSave = { ...formData };
-    delete dataToSave.isChefChoice; // Map back to is_chef_choice
     if (formData.isChefChoice !== undefined) {
       dataToSave.is_chef_choice = formData.isChefChoice;
+      delete dataToSave.isChefChoice;
     }
 
     if (editingItem) {
@@ -158,16 +166,17 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       alert('Error saving: ' + error.message);
     } else {
       setIsFormOpen(false);
-      // Refresh list
+      // Force refresh of stats and list
+      const currentView = activeView;
       setActiveView('dashboard');
-      setTimeout(() => setActiveView(activeView), 10);
+      setTimeout(() => setActiveView(currentView), 50);
     }
     setLoading(false);
   };
 
   const renderForm = () => (
     <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-card-dark w-full max-w-lg rounded-2xl border border-white/10 p-6 max-h-[90vh] overflow-y-auto">
+      <div className="bg-card-dark w-full max-w-lg rounded-2xl border border-white/10 p-6 max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-white text-xl font-bold">{editingItem ? 'Edit' : 'Add New'} {activeView}</h3>
           <button onClick={() => setIsFormOpen(false)} className="text-white/50">
@@ -177,10 +186,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold">Name / Title</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Name / Title</label>
             <input
               type="text"
-              className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white focus:border-accent-gold outline-none text-base"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
               value={formData.name || formData.title || formData.customer_name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value, customer_name: e.target.value })}
               required
@@ -188,13 +197,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold">Image</label>
-            <div className="flex gap-3 items-center">
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Image Asset</label>
+            <div className="flex gap-4 items-center">
               {formData.image && (
-                <div className="size-16 rounded-lg bg-cover bg-center border border-white/10" style={{ backgroundImage: `url("${formData.image}")` }}></div>
+                <div className="size-20 rounded-2xl bg-cover bg-center border border-white/10 flex-none" style={{ backgroundImage: `url("${formData.image}")` }}></div>
               )}
-              <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-lg h-16 flex items-center justify-center text-white/50 hover:bg-white/10 transition-colors">
-                {uploading ? 'Uploading...' : 'Tap to Upload'}
+              <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-2xl h-20 flex flex-col items-center justify-center text-white/30 hover:bg-white/10 transition-colors group">
+                <span className="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">cloud_upload</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Processing File...' : 'Upload Image'}</span>
                 <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
               </label>
             </div>
@@ -202,63 +212,59 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold">Price / Rate</label>
+              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Value / Rate</label>
               <input
                 type="text"
-                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none text-base"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
                 value={formData.price || formData.rate || ''}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value, rate: e.target.value })}
               />
             </div>
 
-            {activeView === 'menu' && (
+            {(activeView === 'menu' || activeView === 'wine') ? (
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-accent-gold">Category</label>
+                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
                 <select
-                  className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
-                  value={formData.category || 'Food'}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
+                  value={formData.category || (activeView === 'wine' ? 'Wine' : 'Food')}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 >
                   <option value="Food">Food</option>
                   <option value="Drinks">Drinks</option>
+                  <option value="Wine">Wine</option>
                 </select>
               </div>
-            )}
-
-            {activeView === 'wine' && (
+            ) : activeView === 'events' ? (
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-accent-gold">Year • Region</label>
+                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Event Date</label>
                 <input
                   type="text"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none text-base"
-                  value={formData.year && formData.region ? `${formData.year} • ${formData.region}` : ''}
-                  placeholder="2019 • Tuscany"
-                  onChange={(e) => {
-                    const [year, region] = e.target.value.split(' • ');
-                    setFormData({ ...formData, year: year || '', region: region || '' });
-                  }}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
+                  value={formData.date || ''}
+                  placeholder="Oct 31"
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 />
               </div>
-            )}
+            ) : null}
           </div>
 
           {(activeView === 'menu' || activeView === 'wine') && (
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold">Sub-Category</label>
+              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Sub-Category Tag</label>
               <select
-                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white outline-none text-base"
                 value={formData.subcategory || ''}
                 onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
               >
                 <option value="">None</option>
-                {activeView === 'menu' && formData.category === 'Food' && (
+                {formData.category === 'Food' && (
                   <>
                     <option value="Starters">Starters</option>
                     <option value="Mains">Mains</option>
                     <option value="Desserts">Desserts</option>
                   </>
                 )}
-                {activeView === 'wine' && (
+                {formData.category === 'Wine' && (
                   <>
                     <option value="Red">Red</option>
                     <option value="White">White</option>
@@ -270,23 +276,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             </div>
           )}
 
-          {activeView === 'events' && (
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold">Date</label>
-              <input
-                type="text"
-                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
-                value={formData.date || ''}
-                placeholder="Oct 31"
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              />
-            </div>
-          )}
-
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold">Description</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Details & Information</label>
             <textarea
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none h-24 resize-none text-base"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white outline-none h-32 resize-none text-base"
               value={formData.description || ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             ></textarea>
@@ -295,9 +288,9 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           <button
             type="submit"
             disabled={loading || uploading}
-            className="w-full bg-accent-gold text-primary font-bold h-12 rounded-xl mt-4 active:scale-95 transition-transform disabled:opacity-50"
+            className="w-full bg-accent-gold text-primary font-black h-16 rounded-2xl mt-4 active:scale-95 transition-all disabled:opacity-50 shadow-xl shadow-accent-gold/10 uppercase tracking-widest text-[10px]"
           >
-            {loading ? 'Saving...' : 'Save Changes'}
+            {loading ? 'Processing...' : 'Sync with Database'}
           </button>
         </form>
       </div>
@@ -306,118 +299,108 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
   const renderDashboard = () => (
     <>
-      <div className="flex overflow-x-auto gap-4 p-4 no-scrollbar">
-        <div className="flex min-w-[140px] flex-1 flex-col gap-2 rounded-xl p-4 bg-primary text-white shadow-lg border border-accent-gold/20">
-          <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined text-accent-gold text-lg">loyalty</span>
-            <span className="text-[10px] font-bold text-accent-gold bg-white/10 px-1.5 py-0.5 rounded">+12%</span>
-          </div>
+      <div className="px-6 pt-6">
+        <h1 className="text-3xl font-black text-white italic uppercase tracking-tight">Manager Suite</h1>
+        <p className="text-accent-gold/60 text-[10px] font-black uppercase tracking-[0.3em] mt-2 mb-6">Concierge Operations</p>
+      </div>
+
+      <div className="flex overflow-x-auto gap-4 px-6 mb-8 no-scrollbar">
+        <div className="flex min-w-[160px] flex-col gap-4 rounded-[2rem] p-6 bg-accent-gold text-primary shadow-2xl relative overflow-hidden group">
+          <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:scale-110 transition-transform">loyalty</span>
+          <span className="material-symbols-outlined text-3xl">loyalty</span>
           <div>
-            <p className="text-white/70 text-xs font-medium uppercase tracking-wider">Redeemed</p>
-            <p className="text-2xl font-bold leading-tight">{stats.loyalties}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest opacity-60">Redeemed</p>
+            <p className="text-3xl font-black leading-tight italic">{stats.loyalties}</p>
           </div>
         </div>
-        <div onClick={() => setActiveView('bookings')} className="flex min-w-[140px] flex-1 flex-col gap-2 rounded-xl p-4 bg-card-dark border border-white/5 cursor-pointer">
-          <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined text-accent-gold text-lg">calendar_today</span>
-            <span className="text-[10px] font-bold text-accent-gold bg-accent-gold/10 px-1.5 py-0.5 rounded">Live</span>
-          </div>
+
+        <div onClick={() => setActiveView('bookings')} className="flex min-w-[160px] flex-col gap-4 rounded-[2rem] p-6 bg-card-dark border border-white/5 shadow-xl relative overflow-hidden group cursor-pointer active:scale-95 transition-all">
+          <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-7xl opacity-5 group-hover:scale-110 transition-transform text-accent-gold">calendar_today</span>
+          <span className="material-symbols-outlined text-3xl text-accent-gold">calendar_today</span>
           <div>
-            <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Bookings</p>
-            <p className="text-2xl font-bold leading-tight">{stats.bookings}</p>
-          </div>
-        </div>
-        <div onClick={() => setActiveView('events')} className="flex min-w-[140px] flex-1 flex-col gap-2 rounded-xl p-4 bg-card-dark border border-white/5 cursor-pointer">
-          <div className="flex items-center justify-between">
-            <span className="material-symbols-outlined text-accent-gold text-lg">event</span>
-            <span className="text-[10px] font-bold text-orange-400 bg-orange-400/10 px-1.5 py-0.5 rounded">Tonight</span>
-          </div>
-          <div>
-            <p className="text-white/60 text-xs font-medium uppercase tracking-wider">Active</p>
-            <p className="text-2xl font-bold leading-tight">{stats.activeEvents}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest opacity-40">Live Bookings</p>
+            <p className="text-3xl font-black leading-tight text-white italic">{stats.bookings}</p>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-2">
-        <h2 className="text-white text-xl font-bold tracking-tight mb-4">Management Controls</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button onClick={() => setActiveView('menu')} className="flex flex-col items-start gap-2 p-4 bg-card-dark rounded-xl border border-white/5 active:scale-95 transition-transform">
-            <div className="bg-primary/50 p-2 rounded-lg text-accent-gold">
-              <span className="material-symbols-outlined">restaurant_menu</span>
-            </div>
-            <span className="text-sm font-semibold">Menu Items</span>
+      <div className="px-6 pb-12">
+        <div className="flex items-center justify-between mb-6 px-1">
+          <h2 className="text-white text-xs font-black uppercase tracking-[0.3em] opacity-40">Management Controls</h2>
+          <button
+            onClick={handleLogout}
+            className="text-red-500/60 text-[8px] font-black uppercase tracking-widest flex items-center gap-1"
+          >
+            Logout <span className="material-symbols-outlined text-xs">logout</span>
           </button>
-          <button onClick={() => setActiveView('wine')} className="flex flex-col items-start gap-2 p-4 bg-card-dark rounded-xl border border-white/5 active:scale-95 transition-transform">
-            <div className="bg-primary/50 p-2 rounded-lg text-accent-gold">
-              <span className="material-symbols-outlined">wine_bar</span>
-            </div>
-            <span className="text-sm font-semibold">Wine Cellar</span>
-          </button>
-          <button onClick={() => setActiveView('staff')} className="flex flex-col items-start gap-2 p-4 bg-card-dark rounded-xl border border-white/5 active:scale-95 transition-transform">
-            <div className="bg-primary/50 p-2 rounded-lg text-accent-gold">
-              <span className="material-symbols-outlined">supervisor_account</span>
-            </div>
-            <span className="text-sm font-semibold">Staff Hire</span>
-          </button>
-          <button onClick={() => setActiveView('events')} className="flex flex-col items-start gap-2 p-4 bg-card-dark rounded-xl border border-white/5 active:scale-95 transition-transform">
-            <div className="bg-primary/50 p-2 rounded-lg text-accent-gold">
-              <span className="material-symbols-outlined">celebration</span>
-            </div>
-            <span className="text-sm font-semibold">Live Events</span>
-          </button>
-          <button onClick={() => setActiveView('art')} className="flex flex-col items-start gap-2 p-4 bg-card-dark rounded-xl border border-white/5 active:scale-95 transition-transform">
-            <div className="bg-primary/50 p-2 rounded-lg text-accent-gold">
-              <span className="material-symbols-outlined">palette</span>
-            </div>
-            <span className="text-sm font-semibold">Art Gallery</span>
-          </button>
-          <button onClick={() => setActiveView('bookings')} className="flex flex-col items-start gap-2 p-4 bg-card-dark rounded-xl border border-white/5 active:scale-95 transition-transform">
-            <div className="bg-primary/50 p-2 rounded-lg text-accent-gold">
-              <span className="material-symbols-outlined">description</span>
-            </div>
-            <span className="text-sm font-semibold">Bookings</span>
-          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { id: 'menu', label: 'Menu Items', icon: 'restaurant_menu' },
+            { id: 'wine', label: 'Wine Cellar', icon: 'wine_bar' },
+            { id: 'staff', label: 'Staff Hire', icon: 'supervisor_account' },
+            { id: 'events', label: 'Live Events', icon: 'celebration' },
+            { id: 'art', label: 'Art Gallery', icon: 'palette' },
+            { id: 'bookings', label: 'Inquiries', icon: 'description' }
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveView(item.id as AdminView)}
+              className="flex flex-col items-start gap-4 p-6 bg-card-dark rounded-[2rem] border border-white/5 active:scale-95 transition-all shadow-lg group"
+            >
+              <div className="bg-white/5 p-3 rounded-2xl text-accent-gold group-hover:bg-accent-gold group-hover:text-primary transition-all shadow-md">
+                <span className="material-symbols-outlined">{item.icon}</span>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/70">{item.label}</span>
+            </button>
+          ))}
         </div>
       </div>
     </>
   );
 
   const renderItemsList = () => (
-    <div className="px-4 py-4 space-y-3">
-      <div className="flex items-center gap-2 mb-4">
-        <button onClick={() => setActiveView('dashboard')} className="text-accent-gold">
+    <div className="px-6 py-4 space-y-6">
+      <div className="flex items-center justify-between px-1 mb-2">
+        <button onClick={() => setActiveView('dashboard')} className="size-10 rounded-full bg-white/5 flex items-center justify-center text-accent-gold active:scale-90 transition-all border border-white/5">
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h2 className="text-white text-xl font-bold capitalize">{activeView} Management</h2>
+        <h2 className="text-white text-lg font-black uppercase italic tracking-tight">{activeView} Sync</h2>
       </div>
 
       {loading ? (
-        <div className="py-20 text-center text-accent-gold animate-pulse">Loading items...</div>
+        <div className="py-20 text-center text-accent-gold animate-pulse italic font-bold tracking-widest uppercase text-xs">Accessing Database...</div>
       ) : items.length === 0 ? (
-        <div className="py-10 text-center text-white/50 italic">No items found in this category.</div>
+        <div className="py-16 text-center bg-card-dark rounded-[2rem] border border-white/5 border-dashed">
+          <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">No entries found in this archive</p>
+        </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {items.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 bg-card-dark/50 p-3 rounded-xl border border-white/5">
-              {item.image && (
+            <div key={item.id} className="flex items-center gap-5 bg-card-dark p-4 rounded-3xl border border-white/5 shadow-md group">
+              {item.image ? (
                 <div
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-lg h-12 w-12 flex-none"
+                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl h-14 w-14 flex-none shadow-inner border border-white/5"
                   style={{ backgroundImage: `url("${item.image}")` }}
                 ></div>
+              ) : (
+                <div className="size-14 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 flex-none border border-white/5">
+                  <span className="material-symbols-outlined">image</span>
+                </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-semibold truncate">{item.name || item.title || item.customer_name}</p>
-                <p className="text-white/50 text-xs truncate">
-                  {item.subcategory ? `[${item.subcategory}] ` : ''}
-                  {item.description || item.role || item.date}
-                </p>
+                <p className="text-white text-sm font-black truncate tracking-wide">{item.name || item.title || item.customer_name}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {item.subcategory && <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-accent-gold/20">{item.subcategory}</span>}
+                  <p className="text-white/40 text-[10px] truncate font-medium">{item.description || item.role || item.date}</p>
+                </div>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openForm(item)} className="p-2 text-accent-gold hover:bg-white/5 rounded-lg">
+                <button onClick={() => openForm(item)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-accent-gold hover:bg-accent-gold/20 transition-all">
                   <span className="material-symbols-outlined text-[20px]">edit</span>
                 </button>
-                <button onClick={() => handleDelete(item.id)} className="p-2 text-red-500 hover:bg-white/5 rounded-lg">
+                <button onClick={() => handleDelete(item.id)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-red-500 hover:bg-red-500/20 transition-all">
                   <span className="material-symbols-outlined text-[20px]">delete</span>
                 </button>
               </div>
@@ -429,17 +412,20 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   );
 
   return (
-    <MemberGate title="Manager Access" description="This area is restricted to Ravinteli Olkkari management staff.">
-      <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display pb-24">
-        <Header onOpenMenu={onOpenMenu} title="Manager Suite" />
+    <MemberGate title="Manager Access" description="This area is restricted to Ravinteli Olkkari management staff profile validation.">
+      <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display pb-24 relative overflow-hidden">
+        <Header onOpenMenu={onOpenMenu} title="Society Control" />
 
-        <main className="overflow-x-hidden">
+        <main className="relative z-10 transition-all duration-500">
           {activeView === 'dashboard' ? renderDashboard() : renderItemsList()}
         </main>
 
         {activeView !== 'dashboard' && activeView !== 'bookings' && (
-          <button onClick={() => openForm()} className="fixed right-4 bottom-24 bg-accent-gold text-primary shadow-2xl size-14 rounded-full flex items-center justify-center z-40 active:scale-90 transition-transform">
-            <span className="material-symbols-outlined text-[28px] font-bold">add</span>
+          <button
+            onClick={() => openForm()}
+            className="fixed right-6 bottom-28 bg-accent-gold text-primary shadow-[0_15px_30px_rgba(197,160,89,0.4)] size-16 rounded-3xl flex items-center justify-center z-40 active:scale-90 transition-all border-4 border-primary/20"
+          >
+            <span className="material-symbols-outlined text-3xl font-black">add</span>
           </button>
         )}
 

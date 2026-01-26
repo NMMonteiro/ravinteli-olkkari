@@ -6,10 +6,12 @@ import { supabase } from '../supabase';
 const LoginScreen: React.FC = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isPasswordLogin, setIsPasswordLogin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleMagicLink = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         const { error } = await supabase.auth.signInWithOtp({
@@ -27,55 +29,103 @@ const LoginScreen: React.FC = () => {
         setLoading(false);
     };
 
+    const handlePasswordLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (error) {
+            alert(error.message);
+        } else {
+            navigate('/home');
+        }
+        setLoading(false);
+    };
+
     return (
         <div className="min-h-screen bg-background-dark text-white flex flex-col items-center justify-center p-8 font-display">
             <div className="w-full max-w-sm space-y-8">
                 <div className="flex flex-col items-center">
                     <img src={LOGO_URL} alt="Olkkari" className="h-12 w-auto brightness-0 invert" />
-                    <h2 className="mt-6 text-3xl font-bold tracking-tight text-accent-gold">Member Login</h2>
-                    <p className="mt-2 text-sm text-white/60">Exclusive access for the culinary society</p>
+                    <h2 className="mt-6 text-3xl font-black tracking-tight text-accent-gold uppercase italic">Member Login</h2>
+                    <p className="mt-2 text-sm text-white/50 font-medium">Exclusive access for the society</p>
                 </div>
 
                 {message ? (
-                    <div className="bg-accent-gold/10 border border-accent-gold/20 p-6 rounded-2xl text-center">
-                        <span className="material-symbols-outlined text-accent-gold text-4xl mb-4">mail</span>
-                        <p className="text-white font-medium">{message}</p>
+                    <div className="bg-accent-gold/10 border border-accent-gold/20 p-8 rounded-[2rem] text-center animate-in fade-in zoom-in duration-500">
+                        <div className="size-16 bg-accent-gold/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <span className="material-symbols-outlined text-accent-gold text-3xl">mail</span>
+                        </div>
+                        <p className="text-white font-bold mb-2">Check your inbox</p>
+                        <p className="text-white/60 text-sm leading-relaxed">{message}</p>
+                        <button
+                            onClick={() => setMessage('')}
+                            className="mt-6 text-accent-gold text-xs font-bold uppercase tracking-widest"
+                        >
+                            Try another way
+                        </button>
                     </div>
                 ) : (
-                    <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-                        <div className="space-y-4">
-                            <div>
-                                <label htmlFor="email-address" className="sr-only">Email address</label>
-                                <input
-                                    id="email-address"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    className="relative block w-full rounded-xl border border-white/10 bg-white/5 py-4 px-4 text-white placeholder:text-white/30 focus:border-accent-gold focus:ring-1 focus:ring-accent-gold outline-none"
-                                    placeholder="name@example.com"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
+                    <div className="space-y-6">
+                        <form className="space-y-4" onSubmit={isPasswordLogin ? handlePasswordLogin : handleMagicLink}>
+                            <div className="space-y-4">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-accent-gold/60 ml-1">Email Address</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder:text-white/20 focus:border-accent-gold outline-none transition-all text-base"
+                                        placeholder="your@email.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                                </div>
+
+                                {isPasswordLogin && (
+                                    <div className="space-y-1 animate-in slide-in-from-top-2 duration-300">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-accent-gold/60 ml-1">Password</label>
+                                        <input
+                                            type="password"
+                                            required
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder:text-white/20 focus:border-accent-gold outline-none transition-all text-base"
+                                            placeholder="••••••••"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+                                    </div>
+                                )}
                             </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full bg-accent-gold text-primary font-black py-5 rounded-2xl shadow-xl shadow-accent-gold/10 active:scale-95 transition-all uppercase tracking-[0.2em] text-[10px] mt-2"
+                            >
+                                {loading ? 'Processing...' : (isPasswordLogin ? 'Sign In' : 'Send Magic Link')}
+                            </button>
+                        </form>
+
+                        <div className="flex flex-col items-center gap-6">
+                            <button
+                                type="button"
+                                onClick={() => setIsPasswordLogin(!isPasswordLogin)}
+                                className="text-accent-gold/80 text-[10px] font-black uppercase tracking-widest hover:text-accent-gold transition-colors"
+                            >
+                                {isPasswordLogin ? 'Use Magic Link instead' : 'Login with Password'}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => navigate('/welcome')}
+                                className="text-white/30 text-[9px] font-bold uppercase tracking-[0.3em] hover:text-white transition-colors"
+                            >
+                                Back to Welcome
+                            </button>
                         </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="group relative flex w-full justify-center rounded-xl bg-accent-gold py-4 px-3 text-sm font-bold text-primary uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all disabled:opacity-50"
-                        >
-                            {loading ? 'Sending link...' : 'Send Magic Link'}
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() => navigate('/welcome')}
-                            className="w-full text-white/40 text-xs font-bold uppercase tracking-widest mt-4"
-                        >
-                            Back to Welcome
-                        </button>
-                    </form>
+                    </div>
                 )}
             </div>
         </div>
