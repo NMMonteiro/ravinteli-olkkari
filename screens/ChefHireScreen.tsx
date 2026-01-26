@@ -77,12 +77,48 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
       </div>
     `;
 
+    const confirmationHtml = `
+      <div style="${emailStyles} max-width: 600px; margin: 0 auto; background-color: #1d1516; border: 1px solid #C5A059; border-radius: 20px; overflow: hidden;">
+        <div style="padding: 40px; text-align: center; background-color: #1d1516; border-bottom: 1px solid rgba(197, 160, 89, 0.2);">
+          <img src="${ABSOLUTE_LOGO_URL}" alt="Olkkari Logo" style="width: 120px; height: auto; margin-bottom: 20px;" />
+          <h1 style="color: #C5A059; margin: 0; font-size: 22px; letter-spacing: 3px; text-transform: uppercase; font-weight: bold;">Personal Chef Request</h1>
+        </div>
+        <div style="padding: 40px; background-color: #1d1516;">
+          <p style="font-size: 18px; margin-top: 0; color: #C5A059; font-weight: bold;">Dear ${inquiryName.split(' ')[0]},</p>
+          <p style="font-size: 16px; color: rgba(255,255,255,0.9);">We have received your private hire inquiry for <strong>${selectedStaff?.name}</strong>.</p>
+          
+          <div style="background-color: rgba(197, 160, 89, 0.1); border: 2px solid #C5A059; border-radius: 20px; padding: 35px; margin: 40px 0; text-align: center;">
+            <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; color: #C5A059; margin-bottom: 15px;">Official Status</div>
+            <div style="font-size: 22px; font-weight: bold; color: #ffffff;">Inquiry Logged</div>
+            <p style="font-size: 14px; margin-top: 20px; color: rgba(255,255,255,0.7); line-height: 1.6;">Our team will check the chef's personal schedule and contact you shortly with availability and pricing details.</p>
+          </div>
+
+          <p style="font-size: 16px; color: rgba(255,255,255,0.9);">Thank you for choosing Ravinteli Olkkari for your private event.</p>
+          
+          <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid rgba(197, 160, 89, 0.2); text-align: center;">
+            <p style="margin: 0; font-weight: bold; color: #C5A059; font-size: 18px; letter-spacing: 2px;">RAVINTELI OLKKARI</p>
+            <p style="margin: 5px 0 0 0; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 4px;">The Society Living Room</p>
+          </div>
+        </div>
+      </div>
+    `;
+
     try {
+      // Notify Restaurant
       await supabase.functions.invoke('gmail-smtp', {
         body: {
           to: 'ps.olkkari@gmail.com',
           subject: `Chef Inquiry: ${selectedStaff?.name} - Ref: ${inquiryName}`,
           body: inquiryHtml
+        }
+      });
+
+      // Notify Client
+      await supabase.functions.invoke('gmail-smtp', {
+        body: {
+          to: inquiryEmail,
+          subject: `Chef Service Inquiry - Ravinteli Olkkari`,
+          body: confirmationHtml
         }
       });
 
