@@ -6,7 +6,7 @@ export interface MenuItem {
   price: string;
   description: string;
   image: string;
-  tags?: string[];
+  subcategory?: string;
   isChefChoice?: boolean;
 }
 
@@ -45,6 +45,7 @@ export interface Wine {
   year?: string;
   region?: string;
   type?: string;
+  subcategory?: string;
   price: string;
   description?: string;
   image?: string;

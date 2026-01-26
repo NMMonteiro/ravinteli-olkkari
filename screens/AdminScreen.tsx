@@ -83,7 +83,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
   const openForm = (item: any = null) => {
     setEditingItem(item);
-    setFormData(item || {});
+    setFormData(item || { category: 'Food', subcategory: '' });
     setIsFormOpen(true);
   };
 
@@ -134,16 +134,23 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     const table = tableMap[activeView];
     let error;
 
+    // Remove client-only naming helpers before save
+    const dataToSave = { ...formData };
+    delete dataToSave.isChefChoice; // Map back to is_chef_choice
+    if (formData.isChefChoice !== undefined) {
+      dataToSave.is_chef_choice = formData.isChefChoice;
+    }
+
     if (editingItem) {
       const { error: err } = await supabase
         .from(table)
-        .update(formData)
+        .update(dataToSave)
         .eq('id', editingItem.id);
       error = err;
     } else {
       const { error: err } = await supabase
         .from(table)
-        .insert([formData]);
+        .insert([dataToSave]);
       error = err;
     }
 
@@ -173,7 +180,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             <label className="text-[10px] uppercase font-bold text-accent-gold">Name / Title</label>
             <input
               type="text"
-              className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white focus:border-accent-gold outline-none"
+              className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white focus:border-accent-gold outline-none text-base"
               value={formData.name || formData.title || formData.customer_name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value, customer_name: e.target.value })}
               required
@@ -198,11 +205,12 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
               <label className="text-[10px] uppercase font-bold text-accent-gold">Price / Rate</label>
               <input
                 type="text"
-                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
+                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none text-base"
                 value={formData.price || formData.rate || ''}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value, rate: e.target.value })}
               />
             </div>
+
             {activeView === 'menu' && (
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-accent-gold">Category</label>
@@ -216,24 +224,69 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                 </select>
               </div>
             )}
-            {activeView === 'events' && (
+
+            {activeView === 'wine' && (
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-accent-gold">Date</label>
+                <label className="text-[10px] uppercase font-bold text-accent-gold">Year • Region</label>
                 <input
                   type="text"
-                  className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
-                  value={formData.date || ''}
-                  placeholder="Oct 31"
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none text-base"
+                  value={formData.year && formData.region ? `${formData.year} • ${formData.region}` : ''}
+                  placeholder="2019 • Tuscany"
+                  onChange={(e) => {
+                    const [year, region] = e.target.value.split(' • ');
+                    setFormData({ ...formData, year: year || '', region: region || '' });
+                  }}
                 />
               </div>
             )}
           </div>
 
+          {(activeView === 'menu' || activeView === 'wine') && (
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold text-accent-gold">Sub-Category</label>
+              <select
+                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
+                value={formData.subcategory || ''}
+                onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+              >
+                <option value="">None</option>
+                {activeView === 'menu' && formData.category === 'Food' && (
+                  <>
+                    <option value="Starters">Starters</option>
+                    <option value="Mains">Mains</option>
+                    <option value="Desserts">Desserts</option>
+                  </>
+                )}
+                {activeView === 'wine' && (
+                  <>
+                    <option value="Red">Red</option>
+                    <option value="White">White</option>
+                    <option value="Rose">Rose</option>
+                    <option value="Sparkling">Sparkling</option>
+                  </>
+                )}
+              </select>
+            </div>
+          )}
+
+          {activeView === 'events' && (
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold text-accent-gold">Date</label>
+              <input
+                type="text"
+                className="w-full bg-white/5 border border-white/10 rounded-lg h-10 px-3 text-white outline-none"
+                value={formData.date || ''}
+                placeholder="Oct 31"
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              />
+            </div>
+          )}
+
           <div className="space-y-1">
             <label className="text-[10px] uppercase font-bold text-accent-gold">Description</label>
             <textarea
-              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none h-24 resize-none"
+              className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white outline-none h-24 resize-none text-base"
               value={formData.description || ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             ></textarea>
@@ -355,7 +408,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-white text-sm font-semibold truncate">{item.name || item.title || item.customer_name}</p>
-                <p className="text-white/50 text-xs truncate">{item.description || item.role || item.date}</p>
+                <p className="text-white/50 text-xs truncate">
+                  {item.subcategory ? `[${item.subcategory}] ` : ''}
+                  {item.description || item.role || item.date}
+                </p>
               </div>
               <div className="flex gap-1">
                 <button onClick={() => openForm(item)} className="p-2 text-accent-gold hover:bg-white/5 rounded-lg">
