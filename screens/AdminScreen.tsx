@@ -149,15 +149,42 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       bookings: 'bookings'
     };
 
+    // Columns that actually exist in each table
+    const tableColumns: Record<string, string[]> = {
+      menu: ['name', 'price', 'description', 'image', 'is_chef_choice', 'category', 'subcategory'],
+      wine: ['name', 'year', 'region', 'type', 'subcategory', 'price', 'description', 'image'],
+      staff: ['name', 'role', 'description', 'image', 'rate', 'badge'],
+      events: ['title', 'date', 'time', 'description', 'image', 'type', 'is_tonight'],
+      art: ['title', 'medium', 'price', 'image'],
+      bookings: ['customer_name', 'email', 'date', 'guests', 'location', 'message', 'status']
+    };
+
     const table = tableMap[activeView];
+    const allowedColumns = tableColumns[activeView];
+
+    // Filter and map formData to database columns
+    const dataToSave: any = {};
+    allowedColumns.forEach(col => {
+      // Direct match
+      if (formData[col] !== undefined) {
+        dataToSave[col] = formData[col];
+      }
+      // Fallback mappings for shared input fields
+      else if (col === 'name' && formData.title) dataToSave.name = formData.title;
+      else if (col === 'title' && formData.name) dataToSave.title = formData.name;
+      else if (col === 'price' && formData.rate) dataToSave.price = formData.rate;
+      else if (col === 'rate' && formData.price) dataToSave.rate = formData.price;
+    });
+
+    // Handle Booleans explicitly (Postgres prefers strict types)
+    if (dataToSave.is_chef_choice !== undefined) {
+      dataToSave.is_chef_choice = Boolean(dataToSave.is_chef_choice);
+    }
+    if (dataToSave.is_tonight !== undefined) {
+      dataToSave.is_tonight = Boolean(dataToSave.is_tonight);
+    }
+
     let error;
-
-    // Clean data for saving
-    const dataToSave = { ...formData };
-
-    // Remote internal/unwanted fields
-    delete (dataToSave as any).id;
-    delete (dataToSave as any).created_at;
 
     if (editingItem) {
       const { error: err } = await supabase
@@ -173,14 +200,15 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     }
 
     if (error) {
-      alert('Error saving to ' + table + ': ' + error.message);
-      console.error('Save error details:', error);
+      alert(`Synchronize Failed [${table}]: ${error.message}`);
+      console.error('Save failed:', error);
     } else {
+      alert(`Archive Updated: ${dataToSave.name || dataToSave.title || 'Entry'} successfully saved.`);
       setIsFormOpen(false);
-      // Refresh
+      // Forced Refresh
       const currentView = activeView;
       setActiveView('dashboard');
-      setTimeout(() => setActiveView(currentView), 50);
+      setTimeout(() => setActiveView(currentView), 150);
     }
     setLoading(false);
   };
