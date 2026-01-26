@@ -12,9 +12,9 @@ interface ChefHireScreenProps {
 
 const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
-  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStaff, setSelectedStaff] = useState<StaffMember | null>(null);
   const [inquiryName, setInquiryName] = useState('');
   const [inquiryEmail, setInquiryEmail] = useState('');
   const [inquiryMessage, setInquiryMessage] = useState('');
@@ -48,30 +48,21 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
     setSendingInquiry(true);
 
     const inquiryHtml = `
-      <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #C5A059; border-radius: 12px; overflow: hidden;">
-        <div style="background-color: #502025; padding: 20px; text-align: center;">
-          <h1 style="color: #C5A059; margin: 0;">Chef Service Inquiry</h1>
-        </div>
-        <div style="padding: 30px; background-color: #fff;">
-          <p><strong>You have received a new inquiry for ${selectedStaff?.name}:</strong></p>
-          <ul style="list-style: none; padding: 0;">
-            <li style="margin-bottom: 10px;">👤 <strong>Client:</strong> ${inquiryName} (${inquiryEmail})</li>
-            <li style="margin-bottom: 10px;">👨‍🍳 <strong>Chef:</strong> ${selectedStaff?.name}</li>
-            <li style="margin-bottom: 10px;">📍 <strong>Service:</strong> ${selectedStaff?.role}</li>
-          </ul>
-          ${inquiryMessage ? `<p><strong>Client Message:</strong> ${inquiryMessage}</p>` : ''}
-          <p style="margin-top: 30px; font-size: 12px; color: #666;">Sent from Olkkari Society App</p>
-        </div>
+      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #C5A059; border-radius: 12px; background-color: #fcfcfc;">
+        <h2 style="color: #502025;">Chef Service Inquiry</h2>
+        <p><strong>Chef Requested:</strong> ${selectedStaff?.name}</p>
+        <p><strong>Client:</strong> ${inquiryName}</p>
+        <p><strong>Client Email:</strong> ${inquiryEmail}</p>
+        <p><strong>Details:</strong> ${inquiryMessage || 'None'}</p>
       </div>
     `;
 
     try {
-      await supabase.functions.invoke('onesignal-email', {
+      await supabase.functions.invoke('gmail-smtp', {
         body: {
-          email: 'ps.olkkari@gmail.com',
-          subject: `Chef Inquiry: ${selectedStaff?.name} - By ${inquiryName}`,
-          body: inquiryHtml,
-          name: "Chef Inquiry Notification"
+          to: 'ps.olkkari@gmail.com',
+          subject: `Inquiry: ${selectedStaff?.name} - Ref: ${inquiryName}`,
+          body: inquiryHtml
         }
       });
 
@@ -95,45 +86,45 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
       <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
         <Header onOpenMenu={onOpenMenu} title="Private Service" />
 
-        <div className="px-4 pt-6">
-          <h1 className="text-3xl font-bold text-white mb-2">Private Culinary Experience</h1>
-          <p className="text-white/60 text-sm leading-relaxed">
-            Bring the Olkkari kitchen to your home. Hire our award-winning staff for your next private event.
+        <div className="px-6 pt-10 pb-6">
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Private Culinary Experience</h1>
+          <p className="text-white/40 text-lg leading-relaxed italic">
+            Bring the Olkkari kitchen to your home.
           </p>
         </div>
 
         {loading ? (
-          <div className="py-20 text-center text-accent-gold animate-pulse">Gathering our best...</div>
+          <div className="py-20 text-center text-accent-gold animate-pulse font-bold tracking-widest uppercase text-xs">Gathering our best...</div>
         ) : (
-          <div className="px-4 py-8 grid grid-cols-1 gap-6">
+          <div className="px-4 py-4 grid grid-cols-1 gap-8">
             {staffList.map((staff) => (
-              <div key={staff.id} className="bg-card-dark rounded-3xl border border-white/5 overflow-hidden group">
-                <div className="relative aspect-[4/3]">
-                  <img src={staff.image} alt={staff.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute top-4 left-4 bg-primary px-3 py-1 rounded-full border border-accent-gold shadow-lg">
-                    <p className="text-accent-gold text-xs font-bold uppercase tracking-widest">{staff.badge}</p>
+              <div key={staff.id} className="bg-primary/20 rounded-[32px] border border-white/5 overflow-hidden group shadow-2xl">
+                <div className="relative aspect-square">
+                  <img src={staff.image} alt={staff.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute top-6 left-6 bg-primary/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-accent-gold shadow-2xl">
+                    <p className="text-accent-gold text-[10px] font-black uppercase tracking-[0.2em]">{staff.badge}</p>
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
+                <div className="p-8">
+                  <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-xl font-bold text-white">{staff.name}</h3>
-                      <p className="text-accent-gold text-sm font-medium">{staff.role}</p>
+                      <h3 className="text-2xl font-black text-white tracking-tight">{staff.name}</h3>
+                      <p className="text-accent-gold text-sm font-bold uppercase tracking-widest mt-1">{staff.role}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-white text-lg font-bold">{staff.rate}</p>
-                      <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest leading-none">Hourly Rate</p>
+                      <p className="text-white text-2xl font-black">{staff.rate}</p>
+                      <p className="text-white/20 text-[9px] uppercase font-bold tracking-[0.2em] leading-none mt-1">Hourly</p>
                     </div>
                   </div>
 
-                  <p className="text-white/60 text-sm leading-relaxed mb-6">
-                    {staff.description}
+                  <p className="text-white/60 text-base leading-relaxed mb-8 italic">
+                    "{staff.description}"
                   </p>
 
                   <button
                     onClick={() => setSelectedStaff(staff)}
-                    className="w-full bg-white/5 border border-white/10 text-white font-bold py-4 rounded-xl hover:bg-accent-gold hover:text-primary hover:border-accent-gold transition-all uppercase tracking-widest text-xs"
+                    className="w-full bg-accent-gold text-primary font-black py-5 rounded-2xl hover:opacity-90 active:scale-95 transition-all uppercase tracking-[0.2em] text-xs shadow-xl shadow-accent-gold/10"
                   >
                     Inquire Availability
                   </button>
@@ -146,77 +137,65 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
         {/* Inquiry Modal */}
         {selectedStaff && (
           <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <div className="absolute inset-0 bg-background-dark/90 backdrop-blur-sm" onClick={() => !sendingInquiry && setSelectedStaff(null)} />
-            <div className="relative w-full max-w-lg bg-card-dark rounded-t-[32px] sm:rounded-3xl border-t sm:border border-white/10 p-8 shadow-2xl animate-in slide-in-from-bottom duration-300">
+            <div className="absolute inset-0 bg-background-dark/95 backdrop-blur-md" onClick={() => !sendingInquiry && setSelectedStaff(null)} />
+            <div className="relative w-full max-w-lg bg-card-dark rounded-t-[40px] sm:rounded-[32px] border-t sm:border border-white/10 p-10 shadow-2xl animate-in slide-in-from-bottom duration-500">
               {inquirySent ? (
                 <div className="py-12 text-center">
-                  <div className="size-20 bg-accent-gold/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <span className="material-symbols-outlined text-accent-gold text-4xl animate-bounce">check</span>
+                  <div className="size-24 bg-accent-gold/20 rounded-full flex items-center justify-center mx-auto mb-8 border border-accent-gold/30">
+                    <span className="material-symbols-outlined text-accent-gold text-5xl animate-bounce">rocket_launch</span>
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Request Dispatched!</h3>
-                  <p className="text-white/60">Anthonio will be notified immediately.</p>
+                  <h3 className="text-3xl font-black text-white mb-3">Inquiry Dispatched</h3>
+                  <p className="text-white/40 text-lg">We will contact you via email shortly.</p>
                 </div>
               ) : (
                 <>
-                  <div className="flex justify-between items-center mb-6">
+                  <div className="flex justify-between items-center mb-8">
                     <div>
-                      <h3 className="text-2xl font-bold text-white">Inquire Availability</h3>
-                      <p className="text-accent-gold text-sm font-medium">Requesting: {selectedStaff.name}</p>
+                      <h3 className="text-3xl font-black text-white tracking-tight">Hire {selectedStaff.name.split(' ')[0]}</h3>
+                      <p className="text-accent-gold text-sm font-bold uppercase tracking-widest mt-1">Availability Request</p>
                     </div>
-                    <button onClick={() => setSelectedStaff(null)} className="p-2 text-white/40 hover:text-white transition-colors">
-                      <span className="material-symbols-outlined">close</span>
+                    <button onClick={() => setSelectedStaff(null)} className="size-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
+                      <span className="material-symbols-outlined font-bold">close</span>
                     </button>
                   </div>
 
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1.5 ml-1">Your Name</label>
-                      <input
-                        type="text"
-                        value={inquiryName}
-                        onChange={(e) => setInquiryName(e.target.value)}
-                        placeholder="What should we call you?"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-accent-gold outline-none transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1.5 ml-1">Your Email</label>
-                      <input
-                        type="email"
-                        value={inquiryEmail}
-                        onChange={(e) => setInquiryEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-accent-gold outline-none transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-white/40 text-[10px] uppercase font-bold tracking-widest mb-1.5 ml-1">Event Details</label>
-                      <textarea
-                        value={inquiryMessage}
-                        onChange={(e) => setInquiryMessage(e.target.value)}
-                        placeholder="Tell us about your event (date, number of guests, type of cuisine)..."
-                        className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-accent-gold outline-none transition-colors min-h-[120px] resize-none"
-                      />
-                    </div>
+                  <div className="space-y-5">
+                    <input
+                      type="text"
+                      value={inquiryName}
+                      onChange={(e) => setInquiryName(e.target.value)}
+                      placeholder="Your Full Name"
+                      className="w-full bg-primary/20 border border-white/10 rounded-2xl p-5 h-16 text-white focus:border-accent-gold outline-none transition-colors"
+                    />
+                    <input
+                      type="email"
+                      value={inquiryEmail}
+                      onChange={(e) => setInquiryEmail(e.target.value)}
+                      placeholder="Your Email Address"
+                      className="w-full bg-primary/20 border border-white/10 rounded-2xl p-5 h-16 text-white focus:border-accent-gold outline-none transition-colors"
+                    />
+                    <textarea
+                      value={inquiryMessage}
+                      onChange={(e) => setInquiryMessage(e.target.value)}
+                      placeholder="Tell us about your event..."
+                      className="w-full bg-primary/20 border border-white/10 rounded-2xl p-5 text-white focus:border-accent-gold outline-none min-h-[140px] resize-none transition-colors"
+                    />
                   </div>
 
-                  <div className="mt-8 space-y-4">
+                  <div className="mt-10">
                     <button
                       onClick={handleInquiry}
                       disabled={sendingInquiry}
-                      className="w-full bg-accent-gold text-primary font-extrabold py-5 rounded-xl uppercase tracking-[0.2em] text-sm shadow-xl shadow-accent-gold/10 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+                      className="w-full bg-accent-gold text-primary font-black py-6 rounded-2xl uppercase tracking-[0.2em] text-sm shadow-2xl shadow-accent-gold/20 active:scale-[0.98] transition-all flex items-center justify-center gap-4"
                     >
                       {sendingInquiry ? (
-                        <>
-                          <div className="size-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                          <span>Dispatching Inquiry...</span>
-                        </>
+                        <div className="size-5 border-3 border-primary border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        'Request Now'
+                        <span>Send Request</span>
                       )}
                     </button>
-                    <p className="text-center text-[10px] text-white/30 px-6 leading-relaxed">
-                      By clicking Request Now, our team will review the chef's schedule and contact you directly via email.
+                    <p className="text-center text-[10px] text-white/20 mt-6 px-10 leading-relaxed uppercase tracking-widest font-bold">
+                      Reservation is not confirmed until we reach out personally.
                     </p>
                   </div>
                 </>

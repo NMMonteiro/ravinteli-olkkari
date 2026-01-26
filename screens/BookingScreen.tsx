@@ -29,6 +29,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
 
     setLoading(true);
 
+    // 1. Save to DB
     const { error } = await supabase.from('bookings').insert([
       {
         customer_name: name,
@@ -42,66 +43,43 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
 
     if (error) {
       console.error('Booking error:', error);
-      alert('Something went wrong. Please try again.');
+      alert('Network error. Please try again.');
     } else {
-      // Send notification to the restaurant
-      const bookingHtml = `
-        <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #C5A059; border-radius: 12px; overflow: hidden;">
-          <div style="background-color: #502025; padding: 20px; text-align: center;">
-            <h1 style="color: #C5A059; margin: 0;">New Reservation Request</h1>
+      // 2. Clear HTML templates for Gmail SMTP
+      const notificationHtml = `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #C5A059; border-radius: 12px; background-color: #fcfcfc;">
+          <h2 style="color: #502025;">New Reservation Request</h2>
+          <p><strong>Customer:</strong> ${name}</p>
+          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Guests:</strong> ${guests}</p>
+          <p><strong>Time:</strong> ${date} @ ${time}</p>
+          <p><strong>Requests:</strong> ${comments || 'None'}</p>
+        </div>
+      `;
+
+      const confirmationHtml = `
+        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #C5A059; border-radius: 12px;">
+          <h2 style="color: #C5A059;">Reservation Inquiry Received</h2>
+          <p>We have received your request for ${date} at ${time}.</p>
+          <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; color: #856404; margin: 20px 0;">
+            <strong>Important:</strong> Please note your reservation is <strong>not confirmed</strong> until we reply directly to this email.
           </div>
-          <div style="padding: 30px; background-color: #fff; line-height: 1.6;">
-            <p><strong>A new booking inquiry has been received:</strong></p>
-            <ul style="list-style: none; padding: 0;">
-              <li style="margin-bottom: 10px;">👤 <strong>Customer:</strong> ${name} (${email})</li>
-              <li style="margin-bottom: 10px;">📅 <strong>Date:</strong> ${date}</li>
-              <li style="margin-bottom: 10px;">⏰ <strong>Time:</strong> ${time}</li>
-              <li style="margin-bottom: 10px;">👥 <strong>Guests:</strong> ${guests}</li>
-            </ul>
-            ${comments ? `<p><strong>Special Requests:</strong> ${comments}</p>` : ''}
-            <p style="margin-top: 30px; font-size: 11px; color: #666;">Sent from Olkkari Society App</p>
-          </div>
+          <p>Thank you for choosing Ravinteli Olkkari.</p>
         </div>
       `;
 
       try {
-        await supabase.functions.invoke('onesignal-email', {
-          body: {
-            email: 'ps.olkkari@gmail.com', // Notification address
-            subject: `New Request: ${name} - ${date} @ ${time}`,
-            body: bookingHtml,
-            name: "Internal Notification"
-          }
+        // Notify Restaurant
+        await supabase.functions.invoke('gmail-smtp', {
+          body: { to: 'ps.olkkari@gmail.com', subject: `Booking: ${name} - ${date}`, body: notificationHtml }
         });
 
-        // Also send a shorter confirmation to the customer
-        const customerHtml = `
-          <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #C5A059; border-radius: 12px; overflow: hidden;">
-            <div style="background-color: #502025; padding: 20px; text-align: center;">
-              <h1 style="color: #C5A059; margin: 0;">Olkkari Reservation</h1>
-            </div>
-            <div style="padding: 30px; background-color: #fff;">
-              <p>Dear ${name},</p>
-              <p>We've received your inquiry for <strong>${date} at ${time}</strong>.</p>
-              <div style="margin: 25px 0; padding: 20px; background-color: #fcf8e3; border: 1px solid #faebcc; border-radius: 8px; color: #8a6d3b; text-align: left;">
-                <p style="margin: 0; font-weight: bold;">⚠️ Please Note:</p>
-                <p style="margin: 5px 0 0 0; font-size: 14px;">Your reservation is <strong>NOT confirmed</strong> yet. Our staff will contact you shortly to finalize your booking.</p>
-              </div>
-              <p style="margin-top: 30px;">Warmly,<br/>The Olkkari Team</p>
-            </div>
-          </div>
-        `;
-
-        await supabase.functions.invoke('onesignal-email', {
-          body: {
-            email: email,
-            subject: `Reservation Inquiry Received - Ravinteli Olkkari`,
-            body: customerHtml,
-            name: "Customer Confirmation"
-          }
+        // Notify User
+        await supabase.functions.invoke('gmail-smtp', {
+          body: { to: email, subject: `Reservation Inquiry - Ravinteli Olkkari`, body: confirmationHtml }
         });
-      } catch (err) {
-        console.error('Email error:', err);
+      } catch (e) {
+        console.error('SMTP Error:', e);
       }
 
       setSubmitted(true);
@@ -112,23 +90,24 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
   if (submitted) {
     return (
       <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display flex flex-col items-center justify-center p-6 text-center">
-        <div className="size-20 bg-accent-gold/20 rounded-full flex items-center justify-center mb-6">
-          <span className="material-symbols-outlined text-accent-gold text-4xl animate-bounce">mark_email_read</span>
+        <div className="size-24 bg-accent-gold/20 rounded-full flex items-center justify-center mb-8 border border-accent-gold/40">
+          <span className="material-symbols-outlined text-accent-gold text-5xl">inventory_2</span>
         </div>
-        <h2 className="text-3xl font-bold mb-2">Request Sent!</h2>
-        <p className="text-white font-medium mb-4">We've received your inquiry for<br />{date} at {time}.</p>
-        <div className="bg-primary/20 border border-accent-gold/30 p-5 rounded-2xl mb-8 max-w-sm">
-          <p className="text-accent-gold text-sm font-bold uppercase tracking-widest mb-1.5 flex items-center justify-center gap-2">
-            <span className="material-symbols-outlined text-sm">warning</span>
-            Important
-          </p>
-          <p className="text-white/80 text-sm leading-relaxed">
-            Your reservation is <span className="text-accent-gold font-bold underline">not confirmed</span> until our team contacts you personally.
+        <h2 className="text-4xl font-bold mb-4 tracking-tight">Request Logged</h2>
+        <p className="text-white/80 text-lg mb-8 max-w-xs mx-auto">
+          We have received your inquiry for <strong>{date}</strong>. Our team will review availability and contact you shortly.
+        </p>
+
+        <div className="bg-primary/30 border border-accent-gold/30 p-6 rounded-2xl mb-10 w-full max-w-sm">
+          <h4 className="text-accent-gold font-bold uppercase tracking-widest text-xs mb-2">PLEASE NOTE</h4>
+          <p className="text-white/90 text-sm leading-relaxed">
+            Please don't consider your reservation confirmed until you receive a formal reply from us.
           </p>
         </div>
+
         <button
           onClick={() => navigate('/home')}
-          className="w-full bg-accent-gold text-primary font-bold py-4 rounded-xl shadow-lg shadow-accent-gold/20 hover:opacity-90 transition-all uppercase tracking-widest"
+          className="w-full bg-accent-gold text-primary font-bold py-5 rounded-xl shadow-2xl active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-sm"
         >
           Return Home
         </button>
@@ -137,118 +116,101 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
   }
 
   return (
-    <MemberGate title="Reserve Your Table" description="Table reservations are an exclusive benefit for our registered members.">
+    <MemberGate title="Table Reservation" description="Exclusive booking service for our Society members.">
       <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
         <Header onOpenMenu={onOpenMenu} title="Reservations" />
 
-        <div className="px-6 pt-8 pb-4">
-          <h3 className="text-white text-3xl font-extrabold leading-tight tracking-tight">Find your spot at our table</h3>
-          <p className="text-white/60 text-base mt-2">Welcome home to Ravinteli Olkkari</p>
+        <div className="px-6 pt-10 pb-6">
+          <h3 className="text-white text-3xl font-black leading-tight tracking-tight">Find your spot at our table</h3>
+          <p className="text-white/60 text-lg mt-2">Welcome home to Ravinteli Olkkari</p>
         </div>
 
-        <div className="space-y-8 overflow-y-auto max-h-[calc(100vh-200px)] no-scrollbar pb-10">
-          <div className="px-6 space-y-5">
-            <div>
-              <label className="block text-white/40 text-[10px] uppercase font-bold tracking-[0.2em] mb-2 px-1">Full Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-primary/20 border border-white/10 rounded-xl p-4 text-white text-base focus:border-accent-gold outline-none h-14 transition-colors"
-                placeholder="e.g. Pekka Puupää"
-              />
-            </div>
-            <div>
-              <label className="block text-white/40 text-[10px] uppercase font-bold tracking-[0.2em] mb-2 px-1">Email Address</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-primary/20 border border-white/10 rounded-xl p-4 text-white text-base focus:border-accent-gold outline-none h-14 transition-colors"
-                placeholder="pekka@example.com"
-              />
-            </div>
+        <div className="space-y-8 px-6">
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 h-16 text-white focus:border-accent-gold outline-none"
+              placeholder="Full Name"
+            />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 h-16 text-white focus:border-accent-gold outline-none"
+              placeholder="Email Address"
+            />
           </div>
 
-          <div className="px-6">
-            <h3 className="text-white text-xl font-bold tracking-tight mb-4">Number of Guests</h3>
-            <div className="flex items-center gap-4 bg-primary/20 p-5 rounded-2xl border border-white/10">
-              <button
-                onClick={() => setGuests(Math.max(1, guests - 1))}
-                className="size-12 rounded-full border border-accent-gold flex items-center justify-center text-accent-gold hover:bg-accent-gold/10 transition-colors"
-              >
-                <span className="material-symbols-outlined text-xl">remove</span>
+          <div>
+            <h3 className="text-white font-bold opacity-40 uppercase tracking-[0.2em] text-[10px] mb-3 ml-1">Number of Guests</h3>
+            <div className="flex items-center gap-6 bg-primary/20 p-5 rounded-2xl border border-white/5">
+              <button onClick={() => setGuests(Math.max(1, guests - 1))} className="size-12 rounded-full border border-accent-gold flex items-center justify-center text-accent-gold">
+                <span className="material-symbols-outlined">remove</span>
               </button>
               <div className="flex-1 text-center">
-                <span className="text-3xl font-black text-accent-gold">{guests}</span>
-                <span className="text-sm font-bold text-white/40 ml-2 uppercase tracking-widest">Guests</span>
+                <span className="text-4xl font-black text-accent-gold">{guests}</span>
               </div>
-              <button
-                onClick={() => setGuests(guests + 1)}
-                className="size-12 rounded-full border border-accent-gold flex items-center justify-center text-accent-gold hover:bg-accent-gold/10 transition-colors"
-              >
-                <span className="material-symbols-outlined text-xl">add</span>
+              <button onClick={() => setGuests(guests + 1)} className="size-12 rounded-full border border-accent-gold flex items-center justify-center text-accent-gold">
+                <span className="material-symbols-outlined">add</span>
               </button>
             </div>
           </div>
 
-          <div className="px-6">
-            <h3 className="text-white text-xl font-bold tracking-tight mb-4">Select Date</h3>
-            <div className="relative">
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-primary/20 border border-white/10 rounded-xl p-4 text-white text-base focus:border-accent-gold outline-none h-14 transition-colors"
-                style={{ colorScheme: 'dark' }}
-              />
-              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white pointer-events-none text-2xl font-bold">
-                calendar_today
-              </span>
+          <div className="grid grid-cols-1 gap-6">
+            <div>
+              <h3 className="text-white font-bold opacity-40 uppercase tracking-[0.2em] text-[10px] mb-3 ml-1">Select Date</h3>
+              <div className="relative">
+                <input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 h-16 text-white focus:border-accent-gold outline-none"
+                  style={{ colorScheme: 'dark' }}
+                />
+                <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl pointer-events-none">
+                  calendar_today
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-white font-bold opacity-40 uppercase tracking-[0.2em] text-[10px] mb-3 ml-1">Select Time</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {['17:00', '18:00', '19:00', '20:00', '21:00'].map(t => (
+                  <button
+                    key={t}
+                    onClick={() => setTime(t)}
+                    className={`py-4 rounded-xl border font-bold transition-all ${time === t ? 'border-accent-gold bg-accent-gold/20 text-accent-gold' : 'border-white/5 text-white/40'}`}
+                  >
+                    {t}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="px-6">
-            <h3 className="text-white text-xl font-bold tracking-tight mb-4">Select Time</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {['17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00'].map(t => (
-                <button
-                  key={t}
-                  onClick={() => setTime(t)}
-                  className={`py-4 rounded-xl border text-sm font-black transition-all ${time === t ? 'border-accent-gold bg-accent-gold/20 text-accent-gold shadow-lg shadow-accent-gold/10' : 'border-white/5 bg-white/5 text-white/50'}`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="px-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-white text-xl font-bold tracking-tight">Special Requests</h3>
-              <span className="text-white/30 text-[10px] uppercase font-bold tracking-[0.2em] px-2">Optional</span>
-            </div>
+          <div>
+            <h3 className="text-white font-bold opacity-40 uppercase tracking-[0.2em] text-[10px] mb-3 ml-1">Special Occasion</h3>
             <textarea
               value={comments}
               onChange={(e) => setComments(e.target.value)}
-              className="w-full bg-primary/20 border border-white/10 rounded-xl p-4 text-white text-sm placeholder:text-white/20 focus:border-accent-gold outline-none min-h-[120px] transition-colors resize-none"
-              placeholder="Tell us about allergies, birthdays, or specific table preferences..."
-            ></textarea>
+              className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 text-white focus:border-accent-gold outline-none h-32 resize-none"
+              placeholder="Allergies, birthdays, or preferences..."
+            />
           </div>
 
-          <div className="px-6 pb-12">
+          <div className="pb-10">
             <button
               onClick={handleBooking}
               disabled={loading}
-              className="w-full bg-accent-gold text-primary font-black py-5 rounded-xl shadow-xl shadow-accent-gold/20 active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3"
+              className="w-full bg-accent-gold text-primary font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3"
             >
               {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                  <span>Dispatching...</span>
-                </>
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               ) : (
-                'Confirm Request'
+                'Request Table'
               )}
             </button>
           </div>
