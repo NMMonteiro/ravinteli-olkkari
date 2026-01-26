@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts'
+import nodemailer from 'npm:nodemailer@6.9.1'
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -10,7 +10,6 @@ const GMAIL_USER = 'ps.olkkari@gmail.com'
 const GMAIL_PASS = 'aeonetmcbwjvkjyp'
 
 serve(async (req) => {
-    // Handle CORS preflight
     if (req.method === 'OPTIONS') {
         return new Response('ok', { headers: corsHeaders })
     }
@@ -18,29 +17,29 @@ serve(async (req) => {
     try {
         const { to, subject, body } = await req.json()
 
-        const client = new SmtpClient()
-        await client.connect({
-            hostname: 'smtp.gmail.com',
-            port: 587,
-            username: GMAIL_USER,
-            password: GMAIL_PASS,
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: GMAIL_USER,
+                pass: GMAIL_PASS,
+            },
         })
 
-        await client.send({
-            from: GMAIL_USER,
+        const info = await transporter.sendMail({
+            from: `"Ravinteli Olkkari" <${GMAIL_USER}>`,
             to: to,
             subject: subject,
-            content: body,
             html: body,
         })
 
-        await client.close()
+        console.log('Message sent: %s', info.messageId)
 
-        return new Response(JSON.stringify({ success: true }), {
+        return new Response(JSON.stringify({ success: true, messageId: info.messageId }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200,
         })
     } catch (error) {
+        console.error('SMTP Error:', error)
         return new Response(JSON.stringify({ error: error.message }), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 400,

@@ -47,13 +47,33 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
 
     setSendingInquiry(true);
 
+    const ABSOLUTE_LOGO_URL = 'https://ravinteli-olkkari.vercel.app/assets/logo/Olkkari-simple.png';
+    const emailStyles = `font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #ffffff; line-height: 1.6;`;
+
     const inquiryHtml = `
-      <div style="font-family: sans-serif; padding: 20px; border: 1px solid #C5A059; border-radius: 12px; background-color: #fcfcfc;">
-        <h2 style="color: #502025;">Chef Service Inquiry</h2>
-        <p><strong>Chef Requested:</strong> ${selectedStaff?.name}</p>
-        <p><strong>Client:</strong> ${inquiryName}</p>
-        <p><strong>Client Email:</strong> ${inquiryEmail}</p>
-        <p><strong>Details:</strong> ${inquiryMessage || 'None'}</p>
+      <div style="${emailStyles} max-width: 600px; margin: 0 auto; background-color: #1d1516; border: 1px solid #C5A059; border-radius: 20px; overflow: hidden;">
+        <div style="padding: 40px; text-align: center; background-color: #1d1516;">
+          <img src="${ABSOLUTE_LOGO_URL}" alt="Olkkari Logo" style="width: 120px; height: auto; margin-bottom: 20px;" />
+          <h1 style="color: #C5A059; margin: 0; font-size: 22px; letter-spacing: 3px; text-transform: uppercase; font-weight: bold;">Chef Service Request</h1>
+        </div>
+        <div style="padding: 0 40px 40px 40px; background-color: #1d1516;">
+          <div style="background-color: rgba(197, 160, 89, 0.05); border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 16px; padding: 30px; margin-bottom: 30px;">
+            <table style="width: 100%; color: #ffffff;">
+              <tr><td style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px; padding-bottom: 5px;">Service Requested</td></tr>
+              <tr><td style="font-size: 20px; font-weight: bold; color: #C5A059; padding-bottom: 25px;">Hire ${selectedStaff?.name}</td></tr>
+              <tr><td style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px; padding-bottom: 5px;">Client Information</td></tr>
+              <tr><td style="font-size: 16px; font-weight: bold; color: #ffffff;">${inquiryName}</td></tr>
+              <tr><td style="font-size: 14px; color: #888; padding-bottom: 25px;">${inquiryEmail}</td></tr>
+            </table>
+            ${inquiryMessage ? `
+              <div style="margin-top: 10px; padding-top: 25px; border-top: 1px solid rgba(197, 160, 89, 0.2);">
+                <div style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px;">Event Details</div>
+                <div style="font-size: 14px; font-style: italic; margin-top: 10px; color: rgba(255,255,255,0.8); line-height: 1.5;">"${inquiryMessage}"</div>
+              </div>
+            ` : ''}
+          </div>
+          <p style="font-size: 10px; color: #666; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">Ravinteli Olkkari Societies • Private Dining Inquiry</p>
+        </div>
       </div>
     `;
 
@@ -61,7 +81,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
       await supabase.functions.invoke('gmail-smtp', {
         body: {
           to: 'ps.olkkari@gmail.com',
-          subject: `Inquiry: ${selectedStaff?.name} - Ref: ${inquiryName}`,
+          subject: `Chef Inquiry: ${selectedStaff?.name} - Ref: ${inquiryName}`,
           body: inquiryHtml
         }
       });

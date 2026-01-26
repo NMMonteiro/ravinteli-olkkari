@@ -29,7 +29,6 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
 
     setLoading(true);
 
-    // 1. Save to DB
     const { error } = await supabase.from('bookings').insert([
       {
         customer_name: name,
@@ -45,38 +44,90 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
       console.error('Booking error:', error);
       alert('Network error. Please try again.');
     } else {
-      // 2. Clear HTML templates for Gmail SMTP
+      const ABSOLUTE_LOGO_URL = 'https://ravinteli-olkkari.vercel.app/assets/logo/Olkkari-simple.png';
+
+      const emailStyles = `
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        color: #ffffff;
+        line-height: 1.6;
+      `;
+
       const notificationHtml = `
-        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #C5A059; border-radius: 12px; background-color: #fcfcfc;">
-          <h2 style="color: #502025;">New Reservation Request</h2>
-          <p><strong>Customer:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Guests:</strong> ${guests}</p>
-          <p><strong>Time:</strong> ${date} @ ${time}</p>
-          <p><strong>Requests:</strong> ${comments || 'None'}</p>
+        <div style="${emailStyles} max-width: 600px; margin: 0 auto; background-color: #1d1516; border: 1px solid #C5A059; border-radius: 20px; overflow: hidden;">
+          <div style="padding: 40px; text-align: center; background-color: #1d1516;">
+            <img src="${ABSOLUTE_LOGO_URL}" alt="Olkkari Logo" style="width: 120px; height: auto; margin-bottom: 20px;" />
+            <h1 style="color: #C5A059; margin: 0; font-size: 24px; letter-spacing: 4px; text-transform: uppercase; font-weight: bold;">New Reservation</h1>
+          </div>
+          <div style="padding: 0 40px 40px 40px; background-color: #1d1516;">
+            <div style="background-color: rgba(197, 160, 89, 0.05); border: 1px solid rgba(197, 160, 89, 0.2); border-radius: 16px; padding: 30px; margin-bottom: 30px;">
+              <table style="width: 100%; color: #ffffff;">
+                <tr><td style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px; padding-bottom: 5px;">Guest Information</td></tr>
+                <tr><td style="font-size: 18px; font-weight: bold; color: #ffffff; padding-bottom: 25px;">${name} <br/><span style="font-weight: normal; color: #C5A059; font-size: 14px;">${email}</span></td></tr>
+                <tr>
+                  <td>
+                    <table style="width: 100%;">
+                      <tr>
+                        <td style="width: 33%;">
+                          <div style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px;">Date</div>
+                          <div style="font-size: 16px; font-weight: bold; color: #C5A059; margin-top: 5px;">${date}</div>
+                        </td>
+                        <td style="width: 33%;">
+                          <div style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px;">Time</div>
+                          <div style="font-size: 16px; font-weight: bold; color: #C5A059; margin-top: 5px;">${time}</div>
+                        </td>
+                        <td style="width: 33%;">
+                          <div style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px;">Guests</div>
+                          <div style="font-size: 16px; font-weight: bold; color: #C5A059; margin-top: 5px;">${guests}</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              ${comments ? `
+                <div style="margin-top: 30px; padding-top: 25px; border-top: 1px solid rgba(197, 160, 89, 0.2);">
+                  <div style="color: #888; text-transform: uppercase; font-size: 10px; font-weight: bold; letter-spacing: 2px;">Special Requests</div>
+                  <div style="font-size: 14px; font-style: italic; margin-top: 10px; color: rgba(255,255,255,0.8); line-height: 1.5;">"${comments}"</div>
+                </div>
+              ` : ''}
+            </div>
+            <p style="font-size: 10px; color: #666; text-align: center; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px;">Ravinteli Olkkari Society App • Automated Notification</p>
+          </div>
         </div>
       `;
 
       const confirmationHtml = `
-        <div style="font-family: sans-serif; padding: 20px; border: 1px solid #C5A059; border-radius: 12px;">
-          <h2 style="color: #C5A059;">Reservation Inquiry Received</h2>
-          <p>We have received your request for ${date} at ${time}.</p>
-          <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeeba; color: #856404; margin: 20px 0;">
-            <strong>Important:</strong> Please note your reservation is <strong>not confirmed</strong> until we reply directly to this email.
+        <div style="${emailStyles} max-width: 600px; margin: 0 auto; background-color: #1d1516; border: 1px solid #C5A059; border-radius: 24px; overflow: hidden;">
+          <div style="padding: 50px 40px; text-align: center; background-color: #1d1516; border-bottom: 1px solid rgba(197, 160, 89, 0.2);">
+            <img src="${ABSOLUTE_LOGO_URL}" alt="Olkkari Logo" style="width: 140px; height: auto; margin-bottom: 25px;" />
+            <h1 style="color: #C5A059; margin: 0; font-size: 26px; letter-spacing: 3px; text-transform: uppercase; font-weight: bold;">Inquiry Logged</h1>
           </div>
-          <p>Thank you for choosing Ravinteli Olkkari.</p>
+          <div style="padding: 50px 40px; background-color: #1d1516;">
+            <p style="font-size: 18px; margin-top: 0; color: #C5A059; font-weight: bold;">Dear ${name.split(' ')[0]},</p>
+            <p style="font-size: 16px; color: rgba(255,255,255,0.9);">We have received your reservation inquiry for <strong>${date}</strong> at <strong>${time}</strong>.</p>
+            
+            <div style="background-color: rgba(197, 160, 89, 0.1); border: 2px solid #C5A059; border-radius: 20px; padding: 35px; margin: 40px 0; text-align: center;">
+              <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 3px; color: #C5A059; margin-bottom: 15px;">Official Status</div>
+              <div style="font-size: 22px; font-weight: bold; color: #ffffff;">Waitlist / Pending</div>
+              <p style="font-size: 14px; margin-top: 20px; color: rgba(255,255,255,0.7); line-height: 1.6;">Please note that your table is <strong>not confirmed</strong> until one of our hosts reaches out to confirm availability. We curated every evening specifically for our members.</p>
+            </div>
+
+            <p style="font-size: 16px; color: rgba(255,255,255,0.9);">We look forward to seeing you at the living room.</p>
+            
+            <div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid rgba(197, 160, 89, 0.2); text-align: center;">
+              <p style="margin: 0; font-weight: bold; color: #C5A059; font-size: 18px; letter-spacing: 2px;">RAVINTELI OLKKARI</p>
+              <p style="margin: 5px 0 0 0; font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 4px;">The Society Living Room</p>
+            </div>
+          </div>
         </div>
       `;
 
       try {
-        // Notify Restaurant
         await supabase.functions.invoke('gmail-smtp', {
           body: { to: 'ps.olkkari@gmail.com', subject: `Booking: ${name} - ${date}`, body: notificationHtml }
         });
-
-        // Notify User
         await supabase.functions.invoke('gmail-smtp', {
-          body: { to: email, subject: `Reservation Inquiry - Ravinteli Olkkari`, body: confirmationHtml }
+          body: { to: email, subject: `Reservation Inquiry Received - Ravinteli Olkkari`, body: confirmationHtml }
         });
       } catch (e) {
         console.error('SMTP Error:', e);
@@ -169,7 +220,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
                   className="w-full bg-primary/20 border border-white/5 rounded-2xl p-4 h-16 text-white focus:border-accent-gold outline-none"
                   style={{ colorScheme: 'dark' }}
                 />
-                <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl pointer-events-none">
+                <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl pointer-events-none font-bold">
                   calendar_today
                 </span>
               </div>
@@ -182,7 +233,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
                   <button
                     key={t}
                     onClick={() => setTime(t)}
-                    className={`py-4 rounded-xl border font-bold transition-all ${time === t ? 'border-accent-gold bg-accent-gold/20 text-accent-gold' : 'border-white/5 text-white/40'}`}
+                    className={`py-4 rounded-xl border font-bold transition-all ${time === t ? 'border-accent-gold bg-accent-gold/20 text-accent-gold shadow-lg shadow-accent-gold/10' : 'border-white/5 text-white/40'}`}
                   >
                     {t}
                   </button>
@@ -208,7 +259,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
               className="w-full bg-accent-gold text-primary font-black py-5 rounded-2xl shadow-xl active:scale-[0.98] transition-all uppercase tracking-[0.2em] text-sm flex items-center justify-center gap-3"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <div className="size-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               ) : (
                 'Request Table'
               )}
