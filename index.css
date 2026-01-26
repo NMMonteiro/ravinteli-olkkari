@@ -6,6 +6,11 @@
     font-family: 'Work Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
     @apply bg-background-light dark:bg-background-dark text-white antialiased selection:bg-accent-gold selection:text-primary;
+    overflow-x: hidden;
+    position: relative;
+    width: 100%;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
   }
 }
 
