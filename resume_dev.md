@@ -28,12 +28,15 @@
 - Configured Supabase client in `supabase.ts`.
 - Updated `MenuScreen`, `EventsScreen`, `ChefHireScreen`, and `GalleryScreen` to fetch data dynamically.
 - Implemented functional booking submission in `BookingScreen`.
-- Updated `tsxonfig.json` to include `vite/client` types for `import.meta.env` support.
+- Updated `tsconfig.json` to include `vite/client` types for `import.meta.env` support.
+- Created GitHub repository: [NMMonteiro/ravinteli-olkkari](https://github.com/NMMonteiro/ravinteli-olkkari)
+- Deployed to Vercel: [ravinteli-olkkari.vercel.app](https://ravinteli-olkkari-7llhu05du-nunos-projects-d60951f9.vercel.app)
+- Integrated live AI Chat with Gemini 1.5 Flash in `ChatScreen`.
 
 ## Phase 3: Core Feature Implementation
 **Status:** In Progress
 
 ### Next Steps:
+- Move Gemini API call to a Supabase Edge Function for improved security.
 - Implement Authentication (Magic Link) for Admin access.
 - Build Admin Dashboard to manage Menu, Events, and Bookings.
-- Connect AI Chat to a real Gemini backend via Edge Function.
