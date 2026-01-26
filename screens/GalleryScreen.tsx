@@ -3,8 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Navigation } from '../components/Navigation';
 import { supabase } from '../supabase';
 import { ArtPiece } from '../types';
+import { LOGO_URL } from '../constants';
 
-const GalleryScreen: React.FC = () => {
+import { Header } from '../components/Header';
+
+interface GalleryScreenProps {
+  onOpenMenu: () => void;
+}
+
+const GalleryScreen: React.FC<GalleryScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
   const [artCollection, setArtCollection] = useState<ArtPiece[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,17 +36,7 @@ const GalleryScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
-      <div className="sticky top-0 z-50 flex items-center bg-background-light/90 dark:bg-background-dark/90 ios-blur p-4 pb-2 justify-between border-b border-primary/20">
-        <div onClick={() => navigate(-1)} className="text-primary dark:text-white flex size-12 shrink-0 items-center justify-start cursor-pointer">
-          <span className="material-symbols-outlined">arrow_back_ios</span>
-        </div>
-        <h2 className="text-primary dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center uppercase tracking-widest">Living Gallery</h2>
-        <div className="flex w-12 items-center justify-end">
-          <button className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-primary dark:text-white gap-2 text-base font-bold leading-normal min-w-0 p-0">
-            <span className="material-symbols-outlined">share</span>
-          </button>
-        </div>
-      </div>
+      <Header onOpenMenu={onOpenMenu} title="In-House Gallery" />
 
       <main>
         <div className="flex p-6">

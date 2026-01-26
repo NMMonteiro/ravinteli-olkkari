@@ -39,6 +39,17 @@ export interface ArtPiece {
   image: string;
 }
 
+export interface Wine {
+  id: number;
+  name: string;
+  year?: string;
+  region?: string;
+  type?: string;
+  price: string;
+  description?: string;
+  image?: string;
+}
+
 export interface ChatMessage {
   id: number;
   sender: 'bot' | 'user';

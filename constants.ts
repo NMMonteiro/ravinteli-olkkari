@@ -1,6 +1,6 @@
 import { MenuItem, EventItem, StaffMember, ArtPiece } from './types';
 
-export const LOGO_URL = "https://lh3.googleusercontent.com/aida-public/AB6AXuD-s6y3wW1Y_2aV5lVb6eP_Q_F9f0h4s8i-k9gZ6T2b5d4x7n0p8m5f3k6j9h5q8w2e4r1t7y6u0i8o9p0a3s4d5f6g7h8j9k0l";
+export const LOGO_URL = "/assets/logo/Olkkari-simple.png";
 
 export const MENU_ITEMS: MenuItem[] = [
   {

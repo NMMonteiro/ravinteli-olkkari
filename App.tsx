@@ -13,6 +13,10 @@ import GalleryScreen from './screens/GalleryScreen';
 import LoyaltyScreen from './screens/LoyaltyScreen';
 import AdminScreen from './screens/AdminScreen';
 import ChatScreen from './screens/ChatScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import { Sidebar } from './components/Sidebar';
+import { ChatWidget } from './components/ChatWidget';
 
 const PageTransition = ({ children }: React.PropsWithChildren<{}>) => (
   <motion.div
@@ -25,32 +29,52 @@ const PageTransition = ({ children }: React.PropsWithChildren<{}>) => (
     {children}
   </motion.div>
 );
-
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageTransition><SplashScreen /></PageTransition>} />
-        <Route path="/home" element={<PageTransition><HomeScreen /></PageTransition>} />
-        <Route path="/menu" element={<PageTransition><MenuScreen /></PageTransition>} />
-        <Route path="/booking" element={<PageTransition><BookingScreen /></PageTransition>} />
-        <Route path="/events" element={<PageTransition><EventsScreen /></PageTransition>} />
-        <Route path="/chef" element={<PageTransition><ChefHireScreen /></PageTransition>} />
-        <Route path="/gallery" element={<PageTransition><GalleryScreen /></PageTransition>} />
-        <Route path="/loyalty" element={<PageTransition><LoyaltyScreen /></PageTransition>} />
-        <Route path="/admin" element={<PageTransition><AdminScreen /></PageTransition>} />
-        <Route path="/chat" element={<PageTransition><ChatScreen /></PageTransition>} />
-      </Routes>
-    </AnimatePresence>
+    <div className="relative w-full h-full overflow-hidden">
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <ChatWidget />
+
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={location.pathname}
+          className="w-full h-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Routes location={location}>
+            <Route path="/" element={<SplashScreen />} />
+            <Route path="/welcome" element={<WelcomeScreen />} />
+            <Route path="/login" element={<LoginScreen />} />
+            <Route path="/home" element={<HomeScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/menu" element={<MenuScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/booking" element={<BookingScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/events" element={<EventsScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/chef" element={<ChefHireScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/gallery" element={<GalleryScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/loyalty" element={<LoyaltyScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/admin" element={<AdminScreen onOpenMenu={() => setIsSidebarOpen(true)} />} />
+            <Route path="/chat" element={<ChatScreen />} />
+          </Routes>
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 };
 
+import { AuthProvider } from './hooks/useAuth';
+
 export default function App() {
   return (
-    <HashRouter>
-      <AnimatedRoutes />
-    </HashRouter>
+    <AuthProvider>
+      <HashRouter>
+        <AnimatedRoutes />
+      </HashRouter>
+    </AuthProvider>
   );
 }

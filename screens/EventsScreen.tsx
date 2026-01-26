@@ -3,8 +3,15 @@ import { Navigation } from '../components/Navigation';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { EventItem } from '../types';
+import { LOGO_URL } from '../constants';
 
-const EventsScreen: React.FC = () => {
+import { Header } from '../components/Header';
+
+interface EventsScreenProps {
+  onOpenMenu: () => void;
+}
+
+const EventsScreen: React.FC<EventsScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,19 +36,7 @@ const EventsScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-white flex flex-col">
-      <header className="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
-        <div className="flex items-center p-4 pb-2 justify-between">
-          <div onClick={() => navigate(-1)} className="text-primary dark:text-white flex size-12 shrink-0 items-center cursor-pointer">
-            <span className="material-symbols-outlined">arrow_back_ios</span>
-          </div>
-          <h2 className="text-primary dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Upcoming Events</h2>
-          <div className="flex w-12 items-center justify-end">
-            <button className="flex size-12 cursor-pointer items-center justify-center rounded-lg bg-transparent text-primary dark:text-white">
-              <span className="material-symbols-outlined">search</span>
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header onOpenMenu={onOpenMenu} title="What's On" />
 
       <main className="flex-1 overflow-y-auto pb-24">
         <section className="px-4 pt-4">

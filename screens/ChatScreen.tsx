@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '../components/Navigation';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { LOGO_URL } from '../constants';
 
 interface Message {
   role: 'bot' | 'user';
@@ -64,21 +65,20 @@ const ChatScreen: React.FC = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white font-display flex flex-col">
       <header className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5">
-        <div className="flex items-center p-4 pb-4 justify-between">
-          <div onClick={() => navigate(-1)} className="text-primary dark:text-accent-gold flex size-10 shrink-0 items-center justify-center cursor-pointer">
+        <div className="flex items-center p-4 py-3 justify-between">
+          <div onClick={() => navigate(-1)} className="text-primary dark:text-accent-gold flex size-12 shrink-0 items-center justify-start cursor-pointer">
             <span className="material-symbols-outlined">chevron_left</span>
           </div>
-          <div className="flex flex-col items-center">
-            <h2 className="text-gray-900 dark:text-white text-base font-bold leading-tight tracking-tight">AI Concierge</h2>
-            <div className="flex items-center gap-1.5">
-              <span className="size-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-[10px] uppercase tracking-widest text-gray-500 dark:text-gray-400 font-semibold">Online</span>
-            </div>
+          <div className="flex-1 flex justify-center translate-x-3">
+            <img src={LOGO_URL} alt="Olkkari" className="h-7 w-auto object-contain" />
           </div>
-          <div className="flex w-10 items-center justify-end">
-            <button className="flex items-center justify-center text-primary dark:text-accent-gold">
-              <span className="material-symbols-outlined">info</span>
-            </button>
+          <div className="flex w-12 items-center justify-end">
+            <div className="flex flex-col items-end">
+              <div className="flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                <span className="text-[8px] uppercase tracking-widest text-gray-400 font-bold">Online</span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -97,8 +97,8 @@ const ChatScreen: React.FC = () => {
                 {msg.role === 'user' ? 'You' : 'Olkkari Bot'}
               </p>
               <div className={`rounded-2xl px-4 py-3 shadow-sm border text-sm leading-relaxed ${msg.role === 'user'
-                  ? 'bg-primary border-primary text-white rounded-br-none'
-                  : 'bg-white dark:bg-chat-bot text-gray-800 dark:text-gray-200 border-gray-100 dark:border-white/5 rounded-bl-none'
+                ? 'bg-primary border-primary text-white rounded-br-none'
+                : 'bg-white dark:bg-chat-bot text-gray-800 dark:text-gray-200 border-gray-100 dark:border-white/5 rounded-bl-none'
                 }`}>
                 {msg.text}
               </div>

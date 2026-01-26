@@ -7,7 +7,7 @@ const SplashScreen: React.FC = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/home');
+      navigate('/welcome');
     }, 3000);
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -16,7 +16,7 @@ const SplashScreen: React.FC = () => {
     <div className="relative flex min-h-screen w-full flex-col items-center justify-between overflow-hidden px-6 py-12 bg-primary">
       {/* Header Spacer */}
       <div className="h-10 w-full"></div>
-      
+
       {/* Central Branding */}
       <div className="flex flex-col items-center justify-center flex-grow relative z-10">
         <div className="mb-6 flex items-center justify-center">
@@ -30,7 +30,7 @@ const SplashScreen: React.FC = () => {
 
       {/* Background Texture */}
       <div className="fixed inset-0 -z-10 opacity-10 pointer-events-none">
-        <div 
+        <div
           className="w-full h-full bg-center bg-no-repeat bg-cover"
           style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuB1M7c_lctsXVk_ZuMgILPB_r_lbqf4WwTKtroprWcsHIVW6qlDa5aDB3V3H9VmoH7CMeGQ7laD31CvQ8ZE8lyGvEu-faR9lksjMxWiYk701KMHyRo9BjP-PZ_Zhp3ne-fSVe5yZu8zz6CdKM1lmWUivziGMP0dyZ56nAyifvdf5VUBQOlpuavhzjwk5YWenX4rVL2jZWlI3SzWgr9TtvelETqza8UaPzH3vMkN6xE-fyTBC-Q_viZ32_-bjsFEE7eTl_-IBkSiq9M")' }}
         ></div>
@@ -53,7 +53,7 @@ const SplashScreen: React.FC = () => {
           </p>
         </div>
       </div>
-      
+
       {/* Bottom Border Accent */}
       <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent"></div>
     </div>
