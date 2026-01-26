@@ -15,7 +15,7 @@ interface AdminScreenProps {
 
 const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const [activeView, setActiveView] = useState<AdminView>('dashboard');
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,36 +32,34 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   }, []);
 
   // Fetch items based on active view
-  useEffect(() => {
+  const fetchItems = async () => {
     if (activeView === 'dashboard') return;
+    setLoading(true);
+    const tableMap: Record<string, string> = {
+      menu: 'menu_items',
+      wine: 'wines',
+      staff: 'staff',
+      events: 'events',
+      art: 'art_pieces',
+      bookings: 'bookings'
+    };
 
-    async function fetchItems() {
-      setLoading(true);
-      const tableMap: Record<string, string> = {
-        menu: 'menu_items',
-        wine: 'wines',
-        staff: 'staff',
-        events: 'events',
-        art: 'art_pieces',
-        bookings: 'bookings'
-      };
+    const { data, error } = await supabase
+      .from(tableMap[activeView])
+      .select('*')
+      .order('id', { ascending: false });
 
-      const { data, error } = await supabase
-        .from(tableMap[activeView])
-        .select('*')
-        .order('id', { ascending: false });
+    if (error) console.error(`Error fetching ${activeView}:`, error);
+    else setItems(data || []);
+    setLoading(false);
+  };
 
-      if (error) console.error(`Error fetching ${activeView}:`, error);
-      else setItems(data || []);
-      setLoading(false);
-    }
-
+  useEffect(() => {
     fetchItems();
   }, [activeView]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
-
     const tableMap: Record<string, string> = {
       menu: 'menu_items',
       wine: 'wines',
@@ -80,11 +78,6 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     else setItems(items.filter(item => item.id !== id));
   };
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/welcome');
-  };
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
   const [formData, setFormData] = useState<any>({});
@@ -93,16 +86,21 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   const openForm = (item: any = null) => {
     setEditingItem(item);
     if (item) {
-      // Map snake_case to camelCase for the form if needed, but let's just use what's there
       setFormData({ ...item });
     } else {
       setFormData({
         category: activeView === 'wine' ? 'Wine' : 'Food',
         subcategory: '',
-        is_chef_choice: false
+        is_chef_choice: false,
+        is_tonight: false
       });
     }
     setIsFormOpen(true);
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/welcome');
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,7 +147,9 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       bookings: 'bookings'
     };
 
-    // Columns that actually exist in each table
+    const table = tableMap[activeView];
+
+    // Explicitly define columns to save for each table to avoid payload errors
     const tableColumns: Record<string, string[]> = {
       menu: ['name', 'price', 'description', 'image', 'is_chef_choice', 'category', 'subcategory'],
       wine: ['name', 'year', 'region', 'type', 'subcategory', 'price', 'description', 'image'],
@@ -159,30 +159,21 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       bookings: ['customer_name', 'email', 'date', 'guests', 'location', 'message', 'status']
     };
 
-    const table = tableMap[activeView];
     const allowedColumns = tableColumns[activeView];
-
-    // Filter and map formData to database columns
     const dataToSave: any = {};
+
     allowedColumns.forEach(col => {
-      // Direct match
       if (formData[col] !== undefined) {
         dataToSave[col] = formData[col];
       }
-      // Fallback mappings for shared input fields
+      // Fallback mappings
       else if (col === 'name' && formData.title) dataToSave.name = formData.title;
       else if (col === 'title' && formData.name) dataToSave.title = formData.name;
-      else if (col === 'price' && formData.rate) dataToSave.price = formData.rate;
-      else if (col === 'rate' && formData.price) dataToSave.rate = formData.price;
     });
 
-    // Handle Booleans explicitly (Postgres prefers strict types)
-    if (dataToSave.is_chef_choice !== undefined) {
-      dataToSave.is_chef_choice = Boolean(dataToSave.is_chef_choice);
-    }
-    if (dataToSave.is_tonight !== undefined) {
-      dataToSave.is_tonight = Boolean(dataToSave.is_tonight);
-    }
+    // Handle Booleans
+    if (dataToSave.is_chef_choice !== undefined) dataToSave.is_chef_choice = !!dataToSave.is_chef_choice;
+    if (dataToSave.is_tonight !== undefined) dataToSave.is_tonight = !!dataToSave.is_tonight;
 
     let error;
 
@@ -200,15 +191,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     }
 
     if (error) {
-      alert(`Synchronize Failed [${table}]: ${error.message}`);
-      console.error('Save failed:', error);
+      alert(`Archive Update Failed: ${error.message}`);
     } else {
-      alert(`Archive Updated: ${dataToSave.name || dataToSave.title || 'Entry'} successfully saved.`);
+      alert(`${dataToSave.name || dataToSave.title || 'Item'} synchronized.`);
       setIsFormOpen(false);
-      // Forced Refresh
-      const currentView = activeView;
-      setActiveView('dashboard');
-      setTimeout(() => setActiveView(currentView), 150);
+      fetchItems(); // Direct fetch after save
     }
     setLoading(false);
   };
@@ -217,7 +204,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     <div className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div className="bg-card-dark w-full max-w-lg rounded-2xl border border-white/10 p-6 max-h-[90vh] overflow-y-auto no-scrollbar">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-white text-xl font-bold uppercase italic tracking-tight">{editingItem ? 'Edit' : 'Add New'} {activeView}</h3>
+          <h3 className="text-white text-xl font-bold uppercase italic tracking-tight">{editingItem ? 'Modify' : 'Archive'} {activeView}</h3>
           <button onClick={() => setIsFormOpen(false)} className="text-white/50">
             <span className="material-symbols-outlined">close</span>
           </button>
@@ -225,7 +212,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4 pb-10">
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Name / Title</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Identity</label>
             <input
               type="text"
               className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
@@ -236,14 +223,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Image Asset</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Visual Asset</label>
             <div className="flex gap-4 items-center">
               {formData.image && (
                 <div className="size-20 rounded-2xl bg-cover bg-center border border-white/10 flex-none" style={{ backgroundImage: `url("${formData.image}")` }}></div>
               )}
               <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-2xl h-20 flex flex-col items-center justify-center text-white/30 hover:bg-white/10 transition-colors group">
                 <span className="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">cloud_upload</span>
-                <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Processing...' : 'Upload Image'}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Archiving Image...' : 'Tap to Upload'}</span>
                 <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
               </label>
             </div>
@@ -251,7 +238,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Value / Rate</label>
+              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Valuation</label>
               <input
                 type="text"
                 className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
@@ -360,7 +347,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           )}
 
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Description / Notes</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Contextual Information</label>
             <textarea
               className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white focus:border-accent-gold outline-none h-32 resize-none text-base"
               value={formData.description || ''}
