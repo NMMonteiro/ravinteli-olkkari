@@ -86,9 +86,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOpenMenu }) => {
           bgImage="https://lh3.googleusercontent.com/aida-public/AB6AXuDNIIII8ywo21-hvgor2z10bU3hnVF0avfXqlxDQ46o2qIGbsN-fH4r3ps5ofXTtM7C-Li_CUGeLyFcettYqLWDpvK-4RwB81kSJ5ispaqh3I1Tc3te5UH3nN91eIdGt-iSy4NqgBHP_KJAoasuFYmMEsi_3T9AmctWBs3kGaxh20kGceazwdInACpLTZd3jlj4c_tkQWtjfeZUKIyo_3yyD1JLK3bWmUWNTUdeIVjerwr82FzQCwrJWCSAbyjKLelxPdCq-S9WFXw"
           onClick={() => navigate('/loyalty')}
           extra={
-            <div className="flex items-center gap-1 bg-accent-gold/20 px-3 py-1 rounded-full border border-accent-gold/30">
-              <span className="material-symbols-outlined text-sm text-accent-gold">star</span>
-              <span className="text-accent-gold text-xs font-bold">1250 PTS</span>
+            <div className="size-14 rounded-full border border-accent-gold/30 bg-accent-gold/20 flex flex-col items-center justify-center shadow-xl shadow-accent-gold/5 backdrop-blur-sm">
+              <span className="text-accent-gold text-xs font-black leading-none">1250</span>
+              <span className="text-accent-gold/60 text-[6px] font-black uppercase tracking-[0.2em] mt-0.5">PTS</span>
             </div>
           }
         />

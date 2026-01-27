@@ -90,7 +90,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
       {/* Sub-Tabs */}
       {(activeCategory === 'Food' || activeCategory === 'Wine') && (
         <div className="bg-background-dark/80 backdrop-blur-sm sticky top-[125px] z-20 py-3 border-b border-white/5 overflow-x-auto no-scrollbar">
-          <div className="px-6 flex gap-6">
+          <div className="px-6 flex gap-6 justify-center">
             {(activeCategory === 'Food' ? FOOD_SUBS : WINE_SUBS).map((sub) => (
               <button
                 key={sub}
@@ -123,7 +123,9 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                       style={{ backgroundImage: `url("${wine.image}")` }}
                     >
                       <div className="h-full w-full bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-                        <span className="bg-accent-gold text-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase">{wine.subcategory || wine.type}</span>
+                        <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20 backdrop-blur-sm">
+                          {wine.subcategory || wine.type}
+                        </span>
                       </div>
                     </div>
                     <div className="p-4">

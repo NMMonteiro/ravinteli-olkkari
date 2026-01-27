@@ -21,6 +21,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ bookings: 0, loyalties: 0, activeEvents: 0 });
 
+  // Search and Filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [subcategoryFilter, setSubcategoryFilter] = useState('');
+
   // Fetch initial stats
   useEffect(() => {
     async function fetchStats() {
@@ -56,6 +60,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
   useEffect(() => {
     fetchItems();
+    setSearchQuery('');
+    setSubcategoryFilter('');
   }, [activeView]);
 
   const handleDelete = async (id: number) => {
@@ -430,56 +436,114 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     </>
   );
 
-  const renderItemsList = () => (
-    <div className="px-6 py-4 space-y-6">
-      <div className="flex items-center justify-between px-1 mb-2">
-        <button onClick={() => setActiveView('dashboard')} className="size-10 rounded-full bg-white/5 flex items-center justify-center text-accent-gold active:scale-90 transition-all border border-white/5">
-          <span className="material-symbols-outlined">arrow_back</span>
-        </button>
-        <h2 className="text-white text-lg font-black uppercase italic tracking-tight">{activeView} Sync</h2>
-      </div>
 
-      {loading ? (
-        <div className="py-20 text-center text-accent-gold animate-pulse italic font-bold tracking-widest uppercase text-xs">Accessing Database...</div>
-      ) : items.length === 0 ? (
-        <div className="py-16 text-center bg-card-dark rounded-[2rem] border border-white/5 border-dashed">
-          <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">No entries found in this archive</p>
+  const renderItemsList = () => {
+    const filteredItems = items.filter(item => {
+      const matchesSearch = (
+        (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.customer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      const matchesSubcategory = !subcategoryFilter || item.subcategory === subcategoryFilter;
+
+      return matchesSearch && matchesSubcategory;
+    });
+
+    const subcategories = activeView === 'menu' ? ['Starters', 'Mains', 'Desserts'] :
+      activeView === 'wine' ? ['Red', 'White', 'Rose', 'Sparkling'] : [];
+
+    return (
+      <div className="px-6 py-4 space-y-6">
+        <div className="flex items-center justify-between px-1 mb-2">
+          <button onClick={() => setActiveView('dashboard')} className="size-10 rounded-full bg-white/5 flex items-center justify-center text-accent-gold active:scale-90 transition-all border border-white/5">
+            <span className="material-symbols-outlined">arrow_back</span>
+          </button>
+          <h2 className="text-white text-lg font-black uppercase italic tracking-tight">{activeView} Sync</h2>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center gap-5 bg-card-dark p-4 rounded-3xl border border-white/5 shadow-md group">
-              {item.image ? (
-                <div
-                  className="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl h-14 w-14 flex-none shadow-inner border border-white/5 transition-transform group-hover:scale-105"
-                  style={{ backgroundImage: `url("${item.image}")` }}
-                ></div>
-              ) : (
-                <div className="size-14 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 flex-none border border-white/5">
-                  <span className="material-symbols-outlined">image</span>
+
+        {/* Search Bar */}
+        <div className="relative">
+          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/20">search</span>
+          <input
+            type="text"
+            placeholder={`Search ${activeView}...`}
+            className="w-full bg-card-dark border border-white/10 rounded-2xl h-12 pl-12 pr-4 text-white focus:border-accent-gold outline-none text-sm transition-all"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Subcategory Filters */}
+        {subcategories.length > 0 && (
+          <div className="flex justify-center gap-2 overflow-x-auto no-scrollbar pb-2">
+            <button
+              onClick={() => setSubcategoryFilter('')}
+              className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${!subcategoryFilter ? 'bg-accent-gold text-primary' : 'bg-white/5 text-white/40 border border-white/10'}`}
+            >
+              All
+            </button>
+            {subcategories.map(sub => (
+              <button
+                key={sub}
+                onClick={() => setSubcategoryFilter(sub)}
+                className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${subcategoryFilter === sub ? 'bg-accent-gold text-primary' : 'bg-white/5 text-white/40 border border-white/10'}`}
+              >
+                {sub}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="py-20 text-center text-accent-gold animate-pulse italic font-bold tracking-widest uppercase text-xs">Accessing Database...</div>
+        ) : filteredItems.length === 0 ? (
+          <div className="py-16 text-center bg-card-dark rounded-[2rem] border border-white/5 border-dashed">
+            <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">
+              {searchQuery || subcategoryFilter ? 'No items match your filters' : 'No entries found in this archive'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4 pb-20">
+            {filteredItems.map((item) => (
+              <div key={item.id} className="flex items-center gap-5 bg-card-dark p-4 rounded-3xl border border-white/5 shadow-md group">
+                {item.image ? (
+                  <div
+                    className="bg-center bg-no-repeat aspect-square bg-cover rounded-2xl h-14 w-14 flex-none shadow-inner border border-white/5 transition-transform group-hover:scale-105"
+                    style={{ backgroundImage: `url("${item.image}")` }}
+                  ></div>
+                ) : (
+                  <div className="size-14 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 flex-none border border-white/5">
+                    <span className="material-symbols-outlined">image</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-sm font-black truncate tracking-wide">{item.name || item.title || item.customer_name}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {item.subcategory && (
+                      <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20 backdrop-blur-sm">
+                        {item.subcategory}
+                      </span>
+                    )}
+                    <p className="text-white/40 text-[10px] truncate font-medium italic">{item.description || item.role || item.date}</p>
+                  </div>
                 </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-black truncate tracking-wide">{item.name || item.title || item.customer_name}</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  {item.subcategory && <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md border border-accent-gold/20">{item.subcategory}</span>}
-                  <p className="text-white/40 text-[10px] truncate font-medium italic">{item.description || item.role || item.date}</p>
+                <div className="flex gap-1">
+                  <button onClick={() => openForm(item)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-accent-gold hover:bg-accent-gold/10 transition-all">
+                    <span className="material-symbols-outlined text-[20px]">edit</span>
+                  </button>
+                  <button onClick={() => handleDelete(item.id)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all">
+                    <span className="material-symbols-outlined text-[20px]">delete</span>
+                  </button>
                 </div>
               </div>
-              <div className="flex gap-1">
-                <button onClick={() => openForm(item)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-accent-gold hover:bg-accent-gold/10 transition-all">
-                  <span className="material-symbols-outlined text-[20px]">edit</span>
-                </button>
-                <button onClick={() => handleDelete(item.id)} className="size-10 rounded-xl bg-white/5 flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all">
-                  <span className="material-symbols-outlined text-[20px]">delete</span>
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <MemberGate title="Manager Access" description="This area is restricted to Ravinteli Olkkari management staff profile validation.">
