@@ -92,7 +92,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   const openForm = (item: any = null) => {
     setEditingItem(item);
     if (item) {
-      setFormData({ ...item });
+      setFormData({
+        ...item,
+        category: item.category || (activeView === 'wine' ? 'Wine' : 'Food')
+      });
     } else {
       setFormData({
         category: activeView === 'wine' ? 'Wine' : 'Food',
@@ -177,6 +180,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       else if (col === 'title' && formData.name) dataToSave.title = formData.name;
     });
 
+    // Mirror subcategory to type for wines to ensure display consistency
+    if (activeView === 'wine' && dataToSave.subcategory) {
+      dataToSave.type = dataToSave.subcategory;
+    }
+
     // Handle Booleans
     if (dataToSave.is_chef_choice !== undefined) dataToSave.is_chef_choice = !!dataToSave.is_chef_choice;
     if (dataToSave.is_tonight !== undefined) dataToSave.is_tonight = !!dataToSave.is_tonight;
@@ -253,13 +261,13 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
               />
             </div>
 
-            {(activeView === 'menu' || activeView === 'wine') ? (
+            {activeView === 'menu' ? (
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
                 <div className="relative">
                   <select
                     className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
-                    value={formData.category || (activeView === 'wine' ? 'Wine' : 'Food')}
+                    value={formData.category || 'Food'}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '' })}
                   >
                     <option value="Food" className="bg-[#1d1516] text-white">Food</option>
@@ -306,6 +314,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                       <option value="White" className="bg-[#1d1516] text-white">White Wine</option>
                       <option value="Rose" className="bg-[#1d1516] text-white">Rosé Wine</option>
                       <option value="Sparkling" className="bg-[#1d1516] text-white">Sparkling / Champagne</option>
+                      <option value="Dessert" className="bg-[#1d1516] text-white">Dessert Wine</option>
                     </>
                   )}
                 </select>
@@ -452,7 +461,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     });
 
     const subcategories = activeView === 'menu' ? ['Starters', 'Mains', 'Desserts'] :
-      activeView === 'wine' ? ['Red', 'White', 'Rose', 'Sparkling'] : [];
+      activeView === 'wine' ? ['Red', 'White', 'Rose', 'Sparkling', 'Dessert'] : [];
 
     return (
       <div className="px-6 py-4 space-y-6">

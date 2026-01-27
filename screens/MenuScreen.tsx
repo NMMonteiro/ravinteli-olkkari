@@ -8,7 +8,7 @@ import { Header } from '../components/Header';
 type Category = 'Food' | 'Drinks' | 'Wine';
 
 const FOOD_SUBS = ['Starters', 'Mains', 'Desserts'];
-const WINE_SUBS = ['Red', 'White', 'Rose', 'Sparkling'];
+const WINE_SUBS = ['Red', 'White', 'Rose', 'Sparkling', 'Dessert'];
 
 interface MenuScreenProps {
   onOpenMenu: () => void;
