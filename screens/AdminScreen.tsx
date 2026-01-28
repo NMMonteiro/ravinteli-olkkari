@@ -555,8 +555,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   };
 
   return (
-    <MemberGate title="Manager Access" description="This area is restricted to Ravinteli Olkkari management staff profile validation.">
-      <div className="min-h-screen bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display pb-24 relative overflow-hidden">
+    <MemberGate adminOnly={true} title="Manager Access" description="This area is restricted to Ravinteli Olkkari management staff profile validation.">
+      <div className="min-h-screen text-slate-900 dark:text-white font-display pb-24 relative overflow-hidden">
         <Header onOpenMenu={onOpenMenu} title="Society Control" />
 
         <main className="relative z-10">

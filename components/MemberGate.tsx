@@ -6,19 +6,23 @@ interface MemberGateProps {
     children: React.ReactNode;
     title?: string;
     description?: string;
+    adminOnly?: boolean;
 }
 
 export const MemberGate: React.FC<MemberGateProps> = ({
     children,
     title = "Member Exclusive",
-    description = "Join our society to unlock table reservations, loyalty rewards, and private chef hire."
+    description = "Join our society to unlock table reservations, loyalty rewards, and private chef hire.",
+    adminOnly = false
 }) => {
-    const { isMember, loading } = useAuth();
+    const { isMember, isAdmin, loading } = useAuth();
     const navigate = useNavigate();
 
     if (loading) return null;
 
-    if (!isMember) {
+    const isAccessDenied = adminOnly ? !isAdmin : !isMember;
+
+    if (isAccessDenied) {
         return (
             <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center p-6 bg-black/60 backdrop-blur-md overscroll-none">
                 {/* Background content (blurred and locked) */}

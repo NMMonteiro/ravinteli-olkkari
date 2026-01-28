@@ -181,7 +181,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
 
   return (
     <MemberGate title="Personal Chef Service" description="Exclusive access to our elite culinary team for your private events.">
-      <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24 overflow-hidden relative">
+      <div className="min-h-screen text-white font-display pb-24 overflow-hidden relative">
         <Header onOpenMenu={onOpenMenu} title="Private Staff" />
 
         <div className="px-6 pt-10 pb-6">

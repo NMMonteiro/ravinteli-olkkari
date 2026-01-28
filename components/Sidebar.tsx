@@ -37,11 +37,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
             {/* Sidebar Panel */}
             <div
-                className={`fixed top-0 left-0 z-[101] h-screen w-[280px] bg-background-dark border-r border-white/5 shadow-2xl transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+                className={`fixed top-0 left-0 z-[101] h-screen w-[280px] bg-[#0c0c0c]/90 backdrop-blur-3xl border-r border-white/5 shadow-2xl transition-transform duration-500 ease-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             >
                 <div className="flex flex-col h-full p-6">
                     <div className="flex items-center justify-between mb-12">
-                        <img src={LOGO_URL} alt="Olkkari" className="h-8 w-auto object-contain brightness-0 invert" />
+                        <img src={LOGO_URL} alt="Olkkari" className="h-10 w-auto object-contain" />
                         <button onClick={onClose} className="text-white/60 hover:text-white">
                             <span className="material-symbols-outlined">close</span>
                         </button>
@@ -52,16 +52,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                             <button
                                 key={item.path}
                                 onClick={() => handleNav(item.path)}
-                                className="w-full flex items-center gap-4 p-4 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-all group"
+                                className="w-full flex items-center gap-4 p-4 rounded-xl text-white/50 hover:text-white hover:bg-white/5 transition-all group"
                             >
-                                <span className="material-symbols-outlined text-accent-gold/60 group-hover:text-accent-gold transition-colors">{item.icon}</span>
-                                <span className="text-sm font-bold uppercase tracking-widest">{item.label}</span>
+                                <span className="material-symbols-outlined text-accent-gold/40 group-hover:text-accent-gold transition-colors">{item.icon}</span>
+                                <span className="text-sm font-montserrat font-light uppercase tracking-[0.3em] group-hover:text-accent-gold">{item.label}</span>
                             </button>
                         ))}
                     </nav>
 
                     <div className="pt-6 border-t border-white/5">
-                        <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] text-center mb-4">The Culinary Society</p>
+                        <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-montserrat font-light text-center mb-4">The Culinary Society</p>
                         <div className="flex justify-center gap-4">
                             <span className="material-symbols-outlined text-white/20 text-sm">facebook</span>
                             <span className="material-symbols-outlined text-white/20 text-sm">camera</span>

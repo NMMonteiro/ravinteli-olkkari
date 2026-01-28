@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navigation } from '../components/Navigation';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { supabase } from '../supabase';
+import { useAuth } from '../hooks/useAuth';
 import { LOGO_URL } from '../constants';
 
 interface Message {
@@ -11,10 +12,11 @@ interface Message {
 
 const ChatScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      text: "Welcome to Ravinteli Olkkari! I'm your digital host. How can I assist your culinary journey today?"
+      text: user ? `Welcome back, ${user.user_metadata?.full_name || user.email?.split('@')[0]}! How can I assist your culinary journey at Olkkari today?` : "Welcome to Ravinteli Olkkari! I'm your digital host. How can I assist your culinary journey today?"
     }
   ]);
   const [input, setInput] = useState('');
@@ -38,20 +40,27 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
 
     try {
-      const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are the AI Concierge for 'Ravinteli Olkkari', a premium dining 'living room' in Helsinki. Your tone is warm, professional, and very welcoming, making guests feel like they are at home but in a high-end restaurant. You know about our menu items (Wagyu sliders, sea bass carpaccio, etc.), our current art exhibition by Elena Rossi, and that we offer private chef hire for home events. Keep responses concise and helpful. If guests ask about bookings, encourage them to use the 'Book Table' feature."
+      // Map local messages to the role format Gemini expects (user/model)
+      const chatHistory = messages.map(msg => ({
+        role: msg.role === 'bot' ? 'model' : 'user',
+        parts: [{ text: msg.text }]
+      }));
+
+      const { data, error } = await supabase.functions.invoke('gemini-chat', {
+        body: {
+          message: userMessage,
+          chatHistory: chatHistory,
+          userName: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Guest'
+        }
       });
 
-      const prompt = userMessage;
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
+      if (error) throw error;
+
+      const text = data?.reply || "I apologize, but I'm having a bit of trouble connecting to our kitchen right now.";
 
       setMessages(prev => [...prev, { role: 'bot', text }]);
     } catch (error) {
-      console.error('Gemini error:', error);
+      console.error('Chat error:', error);
       setMessages(prev => [...prev, { role: 'bot', text: "I apologize, but I'm having a bit of trouble connecting to our kitchen right now. Please try again or call us directly!" }]);
     } finally {
       setLoading(false);
@@ -63,7 +72,7 @@ const ChatScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-white font-display flex flex-col">
+    <div className="min-h-screen text-gray-900 dark:text-white font-display flex flex-col">
       <header className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5">
         <div className="flex items-center p-4 py-3 justify-between">
           <div onClick={() => navigate(-1)} className="text-primary dark:text-accent-gold flex size-12 shrink-0 items-center justify-start cursor-pointer">

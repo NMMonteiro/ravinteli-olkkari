@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { LOGO_URL } from '../constants';
 import { Header } from '../components/Header';
@@ -13,13 +13,19 @@ interface BookingScreenProps {
 
 const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
+
+  // Check for passed state from EventsScreen
+  const eventDate = location.state?.eventDate;
+  const eventTitle = location.state?.eventTitle;
+
   const [guests, setGuests] = useState(2);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(eventDate || new Date().toISOString().split('T')[0]);
   const [time, setTime] = useState('18:00');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [comments, setComments] = useState('');
+  const [comments, setComments] = useState(eventTitle ? `Reservation for: ${eventTitle}` : '');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -183,12 +189,16 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
 
   return (
     <MemberGate title="Table Reservation" description="Exclusive booking service for our Society members.">
-      <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
+      <div className="min-h-screen text-white font-display pb-24">
         <Header onOpenMenu={onOpenMenu} title="Reservations" />
 
         <div className="px-6 pt-10 pb-6">
-          <h3 className="text-white text-3xl font-black leading-tight tracking-tight">Find your spot at our table</h3>
-          <p className="text-white/60 text-lg mt-2">Welcome home to Ravinteli Olkkari</p>
+          <h3 className="text-white text-3xl font-black leading-tight tracking-tight">
+            {eventTitle ? 'Reserve for Event' : 'Find your spot at our table'}
+          </h3>
+          <p className="text-white/60 text-lg mt-2">
+            {eventTitle ? `Booking for: ${eventTitle}` : 'Welcome home to Ravinteli Olkkari'}
+          </p>
         </div>
 
         <div className="space-y-8 px-6">

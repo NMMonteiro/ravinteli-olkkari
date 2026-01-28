@@ -46,10 +46,10 @@ const LoginScreen: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background-dark text-white flex flex-col items-center justify-center p-8 font-display">
+        <div className="min-h-screen text-white flex flex-col items-center justify-center p-8 font-display">
             <div className="w-full max-w-sm space-y-8">
                 <div className="flex flex-col items-center">
-                    <img src={LOGO_URL} alt="Olkkari" className="h-12 w-auto brightness-0 invert" />
+                    <img src={LOGO_URL} alt="Olkkari" className="h-16 w-auto object-contain" />
                     <h2 className="mt-6 text-3xl font-black tracking-tight text-accent-gold uppercase italic">Member Login</h2>
                     <p className="mt-2 text-sm text-white/50 font-medium">Exclusive access for the society</p>
                 </div>

@@ -35,7 +35,7 @@ const GalleryScreen: React.FC<GalleryScreenProps> = ({ onOpenMenu }) => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
+    <div className="min-h-screen text-white font-display pb-24">
       <Header onOpenMenu={onOpenMenu} title="In-House Gallery" />
 
       <main>

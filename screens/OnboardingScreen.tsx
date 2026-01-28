@@ -49,10 +49,10 @@ const OnboardingScreen: React.FC = () => {
     if (loading) return null;
 
     return (
-        <div className="min-h-screen bg-background-dark text-white flex flex-col items-center justify-center p-8 font-display">
+        <div className="min-h-screen text-white flex flex-col items-center justify-center p-8 font-display">
             <div className="w-full max-w-sm space-y-12">
                 <div className="flex flex-col items-center text-center">
-                    <img src={LOGO_URL} alt="Olkkari" className="h-12 w-auto brightness-0 invert" />
+                    <img src={LOGO_URL} alt="Olkkari" className="h-16 w-auto object-contain" />
                     <div className="mt-8 space-y-2">
                         <h2 className="text-3xl font-black tracking-tight text-accent-gold uppercase italic">Welcome Home</h2>
                         <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Setup your Member Profile</p>

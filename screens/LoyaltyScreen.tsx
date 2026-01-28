@@ -50,7 +50,7 @@ const LoyaltyScreen: React.FC<LoyaltyScreenProps> = ({ onOpenMenu }) => {
 
   return (
     <MemberGate title="Member Rewards" description="Start earning points on every visit and unlock exclusive culinary rewards.">
-      <div className="min-h-screen bg-background-light dark:bg-background-dark text-white flex flex-col font-display pb-24">
+      <div className="min-h-screen text-white flex flex-col font-display pb-24">
         <Header onOpenMenu={onOpenMenu} title="Member Rewards" />
 
         <main className="flex-1 overflow-y-auto pb-10">

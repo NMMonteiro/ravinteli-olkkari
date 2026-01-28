@@ -39,7 +39,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-20">
+    <div className="min-h-screen text-white font-display pb-20">
       <Header onOpenMenu={onOpenMenu} />
 
       <main className="flex flex-col gap-4 p-4">

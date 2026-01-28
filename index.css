@@ -5,12 +5,25 @@
   body {
     font-family: 'Work Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
-    @apply bg-background-light dark:bg-background-dark text-white antialiased selection:bg-accent-gold selection:text-primary;
+    background: radial-gradient(circle at 10% 10%, #502025 0%, #1d1516 75%, #000000 100%);
+    background-attachment: fixed;
+    @apply text-white antialiased selection:bg-accent-gold selection:text-primary;
     overflow-x: hidden;
     position: relative;
     width: 100%;
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
+  }
+
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: none !important;
+  }
+
+  select::-ms-expand {
+    display: none;
   }
 }
 

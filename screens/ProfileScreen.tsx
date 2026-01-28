@@ -40,7 +40,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenMenu }) => {
 
     return (
         <MemberGate title="Personal Profile" description="Manage your residency at Ravinteli Olkkari.">
-            <div className="min-h-screen bg-background-light dark:bg-background-dark text-white font-display pb-24">
+            <div className="min-h-screen text-white font-display pb-24">
                 <Header onOpenMenu={onOpenMenu} title={isAdmin ? "Admin Profile" : "Member Profile"} />
 
                 <main className="p-6 max-w-lg mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">

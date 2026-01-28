@@ -11,16 +11,16 @@ interface NavItemProps {
 }
 
 const NavItem: React.FC<NavItemProps> = ({ icon, label, route, active, onClick, filled }) => (
-  <button 
+  <button
     onClick={onClick}
-    className={`flex flex-col items-center gap-1 transition-colors duration-200 ${active ? 'text-accent-gold' : 'text-gray-400 dark:text-white/40'}`}
+    className={`flex flex-col items-center gap-1 transition-colors duration-200 ${active ? 'text-accent-gold' : 'text-white/40'}`}
   >
-    <span 
+    <span
       className={`material-symbols-outlined text-[24px] ${filled && active ? 'fill-1' : ''}`}
     >
       {icon}
     </span>
-    <span className={`text-[10px] font-medium ${active ? 'font-bold' : ''}`}>
+    <span className={`text-[10px] uppercase font-montserrat font-light tracking-[0.2em] ${active ? 'font-bold' : ''}`}>
       {label}
     </span>
   </button>
@@ -34,12 +34,12 @@ export const Navigation: React.FC = () => {
     { label: 'Home', icon: 'home', route: '/home' },
     { label: 'Menu', icon: 'restaurant_menu', route: '/menu', filled: true },
     { label: 'Events', icon: 'event', route: '/events', filled: true },
-    { label: 'Booking', icon: 'book_online', route: '/booking' }, // using book_online to match typical booking icons or calendar_month
+    { label: 'Booking', icon: 'book_online', route: '/booking' },
     { label: 'Loyalty', icon: 'loyalty', route: '/loyalty', filled: true },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background-light/95 dark:bg-background-dark/95 ios-blur border-t border-primary/10 dark:border-white/5 pb-6 pt-2 px-6">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-t border-white/5 pb-6 pt-2 px-6">
       <div className="flex justify-around items-center max-w-lg mx-auto">
         {navs.map((nav) => (
           <NavItem

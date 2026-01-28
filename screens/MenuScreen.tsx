@@ -64,7 +64,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
   }, [activeCategory, activeSubcategory]);
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark text-warm-ivory pb-24">
+    <div className="min-h-screen text-warm-ivory pb-24">
       <Header onOpenMenu={onOpenMenu} title="Seasonal Menu" />
 
       {/* Main Tabs */}
@@ -144,34 +144,45 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
             ) : (
               <div className="flex flex-col gap-4">
                 {menuItems.length === 0 ? (
-                  <div className="py-20 text-center opacity-40 italic text-sm">No selection in this category yet.</div>
+                  <div className="py-20 text-center opacity-40 italic text-sm font-montserrat font-light">No selection in this category yet.</div>
                 ) : menuItems.map((item) => (
-                  <div key={item.id} className="flex items-stretch justify-between gap-4 rounded-xl bg-white dark:bg-primary/20 p-4 shadow-sm border border-primary/10 dark:border-white/5 active:scale-[0.98] transition-transform">
-                    <div className="flex flex-[2_2_0px] flex-col gap-3">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex justify-between items-start gap-2">
-                          <p className="text-accent-gold text-sm font-bold leading-normal">{item.price}</p>
+                  <div key={item.id} className="relative flex items-stretch min-h-[150px] rounded-2xl bg-burgundy-accent/80 backdrop-blur-md overflow-hidden border border-white/5 active:scale-[0.98] transition-all group shadow-2xl">
+                    {/* Content Section - Fully opaque over the blended image edge */}
+                    <div className="flex-1 p-6 z-10 flex flex-col justify-between relative">
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <p className="text-accent-gold text-xs font-montserrat font-bold tracking-widest">{item.price}</p>
                           {item.subcategory && (
-                            <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20">
+                            <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20 backdrop-blur-md">
                               {item.subcategory}
                             </span>
                           )}
                         </div>
-                        <p className="text-primary dark:text-white text-lg font-bold leading-tight">{item.name}</p>
-                        <p className="text-gray-600 dark:text-warm-ivory text-sm font-normal leading-relaxed">{item.description}</p>
+                        <h3 className="text-white text-xl font-bold leading-tight group-hover:text-accent-gold transition-colors">{item.name}</h3>
+                        <p className="text-warm-ivory/60 text-xs font-montserrat font-light leading-relaxed line-clamp-2 max-w-[90%]">{item.description}</p>
                       </div>
+
                       {item.isChefChoice && (
-                        <div className="flex gap-2 items-center">
-                          <span className="material-symbols-outlined text-accent-gold text-sm">workspace_premium</span>
-                          <span className="text-[10px] uppercase tracking-wider text-accent-gold font-bold">Chef's Choice</span>
+                        <div className="flex gap-2 items-center mt-3">
+                          <div className="size-5 rounded-full bg-accent-gold/20 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-accent-gold text-[10px]">workspace_premium</span>
+                          </div>
+                          <span className="text-[9px] uppercase tracking-[0.2em] text-accent-gold font-bold">Chef's Choice</span>
                         </div>
                       )}
                     </div>
+
+                    {/* Perfect Blended Image Section */}
                     {item.image && (
-                      <div
-                        className="w-24 h-24 bg-center bg-no-repeat bg-cover rounded-lg flex-none"
-                        style={{ backgroundImage: `url("${item.image}")` }}
-                      ></div>
+                      <div className="absolute right-0 top-0 bottom-0 w-3/5 h-full pointer-events-none">
+                        <div
+                          className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
+                          style={{ backgroundImage: `url("${item.image}")` }}
+                        />
+                        {/* Blend Overlays - Using the exact card color (#2d2021) for seamless transition */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] via-[#2d2021] via-30% to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] to-transparent opacity-60"></div>
+                      </div>
                     )}
                   </div>
                 ))}
