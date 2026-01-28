@@ -70,25 +70,35 @@ ${staffContext}
 `;
 
         // 3. Call Gemini
-        const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [
-                        ...(chatHistory || []),
-                        { role: 'user', parts: [{ text: message }] }
-                    ],
-                    systemInstruction: {
-                        parts: [{ text: systemInstruction }]
-                    }
-                }),
-            }
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
+
+        const response = await fetch(geminiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [
+                    ...(chatHistory || []),
+                    { role: 'user', parts: [{ text: message }] }
+                ],
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                }
+            }),
+        }
         );
 
         const data = await response.json();
+
+        if (!response.ok) {
+            console.error('Gemini API Error:', data);
+            throw new Error(`Gemini API returned ${response.status}: ${JSON.stringify(data)}`);
+        }
+
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I'm having a slight moment of contemplation. Could you please repeat that?";
+
+        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+            console.warn('Gemini returned no text. Full response:', JSON.stringify(data));
+        }
 
         return new Response(
             JSON.stringify({ reply }),

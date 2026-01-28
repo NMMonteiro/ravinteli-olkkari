@@ -146,6 +146,21 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     setUploading(false);
   };
 
+  const syncWebsite = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-website-context');
+      if (error) throw error;
+      alert('Website context synchronized successfully!');
+      fetchItems();
+    } catch (err: any) {
+      console.error('Sync Error:', err);
+      alert('Sync failed: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -485,6 +500,16 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <h2 className="text-white text-lg font-black uppercase italic tracking-tight">{activeView} Sync</h2>
+          {activeView === 'knowledge' && (
+            <button
+              onClick={syncWebsite}
+              disabled={loading}
+              className="flex items-center gap-2 bg-accent-gold/10 border border-accent-gold/30 text-accent-gold px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-all disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-sm">sync</span>
+              Sync Website
+            </button>
+          )}
         </div>
 
         {/* Search Bar */}

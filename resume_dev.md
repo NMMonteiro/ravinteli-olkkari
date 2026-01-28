@@ -34,14 +34,24 @@
 - **Dropdown Polish**: Globally suppressed browser-native "ghost arrows" on select elements via `index.css` for a consistent, premium look.
 - **Database Maintenance**: Purged all past-dated sample events and updated the registry with February/March 2026 dates to maintain compatibility with reservation date-validation logic.
 
-## Phase 4: Intelligence & Next Steps
-**Status:** In Progress
+## Phase 4: Intelligence & Automation (AI Concierge)
+**Status:** Completed
+**Date:** 2026-01-28
+
+### Actions Taken:
+- **AI Concierge Evolution**: Ported Gemini AI logic to Supabase Edge Functions for secure, zero-client-key exposure. Upgraded to Gemini 1.5/2.0 Flash models.
+- **Dynamic Knowledge Base**: Integrated a `knowledge_base` table in Supabase, allowing the AI to learn restaurant policies, philosophy, and hours dynamically.
+- **Admin "Bot Context" Suite**: Added a management interface for the AI's knowledge base, empowering managers to update bot wisdom without code changes.
+- **Automated Web Sync**: Developed a dedicated crawler Edge Function that scrapes `ravinteliolkkari.fi` to keep the bot's data in sync with the official website.
+- **Enhanced Admin Security**: Secured the "Manager Suite" using `MemberGate` with specialized `adminOnly` permissions.
+- **Production Secret Management**: Migrated sensitive API keys to Supabase Vault/Project Secrets.
 
 ### Recent Successes:
 - **Context-Aware Booking**: Reservations now intelligently pre-populate dates and event titles when navigated from the "What's On" screen.
 - **Typography Standardization**: Shifted key UI elements to the Montserrat font family (weights 300, 700, 900) to maintain a boutique editorial feel.
+- **AI-Driven Customer Support**: The concierge now provides accurate answers about opening hours, location, and philosophy directly from the website data.
 
-### Next Steps (Post-Restart):
-- **Supplied Edge Functions**: Transition Gemini API calls to Supabase Edge Functions for hardened security.
-- **Manager Authentication**: Implement Magic Link or OTP for the `AdminScreen` gate.
+## Next Steps:
 - **Deep Performance Audit**: Review image assets and transition timings for ultra-low latency mobile experience.
+- **OneSignal Integration**: Complete the push notification loop for real-time booking updates.
+- **Analytics Dashboard**: Add basic engagement tracking for the AI concierge usage in the Manager Suite.
