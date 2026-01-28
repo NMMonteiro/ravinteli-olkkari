@@ -41,10 +41,14 @@ const ChatScreen: React.FC = () => {
 
     try {
       // Map local messages to the role format Gemini expects (user/model)
-      const chatHistory = messages.map(msg => ({
-        role: msg.role === 'bot' ? 'model' : 'user',
-        parts: [{ text: msg.text }]
-      }));
+      // IMPORTANT: Conversations must start with a 'user' message for Gemini.
+      // We skip the initial bot greeting message.
+      const chatHistory = messages
+        .filter((_, index) => index > 0) // Skip the very first message which is the bot's auto-greeting
+        .map(msg => ({
+          role: msg.role === 'bot' ? 'model' : 'user',
+          parts: [{ text: msg.text }]
+        }));
 
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: {
