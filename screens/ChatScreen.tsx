@@ -40,15 +40,27 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
 
     try {
+      // Mapping for Gemini model/user roles
+      // Must start with 'user'
+      const chatHistory = messages
+        .filter((_, idx) => idx > 0)
+        .map(m => ({
+          role: m.role === 'bot' ? 'model' : 'user',
+          parts: [{ text: m.text }]
+        }));
+
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
-        body: { message: userMessage }
+        body: {
+          message: userMessage,
+          chatHistory: chatHistory
+        }
       });
 
       if (error) throw error;
       setMessages(prev => [...prev, { role: 'bot', text: data.reply }]);
     } catch (err: any) {
       console.error('Chat Error:', err);
-      setMessages(prev => [...prev, { role: 'bot', text: "Technical error connecting to our kitchen." }]);
+      setMessages(prev => [...prev, { role: 'bot', text: "Host connectivity issue. Please try again." }]);
     } finally {
       setLoading(false);
     }
