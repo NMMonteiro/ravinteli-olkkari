@@ -4,8 +4,9 @@ import { createClient } from 'jsr:@supabase/supabase-js@2';
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-const MODEL_NAME = "gemini-2.0-flash"; // Upgraded model
+const MODEL_NAME = "gemini-2.0-flash";
 
 Deno.serve(async (req) => {
     if (req.method === 'OPTIONS') {
@@ -18,10 +19,10 @@ Deno.serve(async (req) => {
     }
 
     try {
-        const { message, chatHistory, userName } = await req.json();
+        const { message, chatHistory, userName, userId } = await req.json();
 
-        // 1. Initialize Supabase Client
-        const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
+        // 1. Initialize Supabase Client (Service Role for logging)
+        const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
 
         // 2. Fetch Live Context
         const [menuRes, eventsRes, artRes, staffRes, knowledgeRes] = await Promise.all([
@@ -39,34 +40,35 @@ Deno.serve(async (req) => {
         const knowledgeContext = knowledgeRes.data?.map(k => `### ${k.category}\n${k.content}`).join('\n\n') || '';
 
         const systemInstruction = `
-You are the AI Concierge for 'Ravinteli Olkkari', a premium dining 'living room' in Helsinki. 
-Your tone is warm, professional, very welcoming, and slightly sophisticated. 
-You represent a high-end restaurant experience that feels like a home living room.
+You are the Olkkari Concierge, the premium digital host for Ravinteli Olkkari in Helsinki.
+Tone: SOPHISTICATED, WARM, PRO-ACTIVE.
 
-You are currently speaking with ${userName || 'a Guest'}.
+CORE INSTRUCTION:
+When a user asks about something that has a dedicated page in our app, ALWAYS provide a helpful answer and then pro-actively offer to open that page using a Markdown link.
 
-### RESTAURANT INFORMATION & POLICIES:
+SMART LINKS:
+- Chef for Hire -> [Open Chef Hire Page](/chef)
+    - Table Booking / Reservations -> [Book a Table](/booking)
+    - Menu / Food -> [Browse Full Menu](/menu)
+    - Events / Parties -> [View Events](/events)
+    - Music / Atmosphere -> Suggest [Browse Gallery](/gallery)
+
+Currently speaking with: ${userName || 'a Guest'}.
+
+RESTAURANT KNOWLEDGE:
 ${knowledgeContext}
 
-**MENU ITEMS:**
+### MENU:
 ${menuContext}
 
-**UPCOMING EVENTS:**
+### EVENTS:
 ${eventsContext}
 
-**ART EXHIBITION:**
-Our current exhibition is by Elena Rossi.
+### ART & EXHIBITION:
 ${artContext}
 
-**PERSONAL CHEF HIRE & TEAM:**
+### TEAM & CHEF HIRE:
 ${staffContext}
-
-### GUIDELINES:
-- Keep responses concise, helpful, and elegant.
-- If guests ask about bookings, encourage them to use the 'Book Table' feature in the app.
-- If they ask for recommendations, suggest items from the menu based on their preferences.
-- Be proactive but never pushy.
-- Always speak as if you are inside the restaurant, ready to help.
 `;
 
         // 3. Call Gemini
@@ -84,20 +86,31 @@ ${staffContext}
                     parts: [{ text: systemInstruction }]
                 }
             }),
-        }
-        );
+        });
 
         const data = await response.json();
 
         if (!response.ok) {
             console.error('Gemini API Error:', data);
-            throw new Error(`Gemini API returned ${response.status}: ${JSON.stringify(data)}`);
+            throw new Error(`Gemini API error`);
         }
 
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I'm having a slight moment of contemplation. Could you please repeat that?";
 
-        if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
-            console.warn('Gemini returned no text. Full response:', JSON.stringify(data));
+        // 4. LOG ENGAGEMENT (Fire and forget, don't block response)
+        try {
+            await supabase.from('chat_logs').insert([{
+                user_id: userId || null,
+                user_name: userName || 'Anonymous Guest',
+                message: message,
+                response: reply,
+                metadata: {
+                    model: MODEL_NAME,
+                    history_length: chatHistory?.length || 0
+                }
+            }]);
+        } catch (logError) {
+            console.error('Logging Error:', logError);
         }
 
         return new Response(

@@ -53,7 +53,9 @@ const ChatScreen: React.FC = () => {
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
         body: {
           message: userMessage,
-          chatHistory: chatHistory
+          chatHistory: chatHistory,
+          userName: user?.user_metadata?.full_name || user?.email,
+          userId: user?.id
         }
       });
 
