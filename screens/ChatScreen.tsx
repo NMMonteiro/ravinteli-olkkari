@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { Navigation } from '../components/Navigation';
 import { supabase } from '../supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -16,7 +17,7 @@ const ChatScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      text: user ? `Welcome back, ${user.user_metadata?.full_name || user.email?.split('@')[0]}! How can I assist your culinary journey at Olkkari today? (v2.0)` : "Welcome to Ravinteli Olkkari! I'm your digital host. How can I assist your culinary journey today? (v2.0)"
+      text: user ? `Welcome back, ${user.user_metadata?.full_name || user.email?.split('@')[0]}! How can I assist your culinary journey at Olkkari today?` : "Welcome to Ravinteli Olkkari! I'm your digital host. How can I assist your culinary journey today?"
     }
   ]);
   const [input, setInput] = useState('');
@@ -102,13 +103,19 @@ const ChatScreen: React.FC = () => {
             )}
             <div className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <p className="text-gray-500 dark:text-gray-400 text-[11px] font-medium px-1">
-                {msg.role === 'user' ? 'You' : 'Olkkari Bot'}
+                {msg.role === 'user' ? 'You' : 'Olkkari Concierge'}
               </p>
               <div className={`rounded-2xl px-4 py-3 shadow-sm border text-sm leading-relaxed ${msg.role === 'user'
                 ? 'bg-primary border-primary text-white rounded-br-none'
                 : 'bg-white dark:bg-chat-bot text-gray-800 dark:text-gray-200 border-gray-100 dark:border-white/5 rounded-bl-none'
                 }`}>
-                {msg.text}
+                {msg.role === 'user' ? (
+                  msg.text
+                ) : (
+                  <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-strong:text-accent-gold prose-strong:font-bold prose-ul:my-2 prose-li:my-0.5">
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  </div>
+                )}
               </div>
             </div>
             {msg.role === 'user' && (
@@ -123,7 +130,7 @@ const ChatScreen: React.FC = () => {
           <div className="flex items-end gap-3 max-w-[85%]">
             <div className="bg-primary border border-accent-gold/30 aspect-square bg-center bg-no-repeat bg-cover rounded-full size-10 shrink-0"></div>
             <div className="flex flex-col gap-1 items-start">
-              <p className="text-gray-500 dark:text-gray-400 text-[11px] font-medium ml-1">Olkkari Bot</p>
+              <p className="text-gray-500 dark:text-gray-400 text-[11px] font-medium ml-1">Olkkari Concierge</p>
               <div className="rounded-2xl px-5 py-3 bg-white dark:bg-chat-bot shadow-sm border border-gray-100 dark:border-white/5 flex gap-1">
                 <span className="w-1.5 h-1.5 bg-accent-gold rounded-full animate-bounce"></span>
                 <span className="w-1.5 h-1.5 bg-accent-gold rounded-full animate-bounce [animation-delay:0.2s]"></span>
