@@ -24,17 +24,19 @@ Deno.serve(async (req) => {
         const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
 
         // 2. Fetch Live Context
-        const [menuRes, eventsRes, artRes, staffRes] = await Promise.all([
+        const [menuRes, eventsRes, artRes, staffRes, knowledgeRes] = await Promise.all([
             supabase.from('menu_items').select('name, category, subcategory, price, description'),
             supabase.from('events').select('title, date, time, description').eq('is_tonight', false),
             supabase.from('art_pieces').select('title, medium, price'),
-            supabase.from('staff').select('name, role, description')
+            supabase.from('staff').select('name, role, description'),
+            supabase.from('knowledge_base').select('category, content')
         ]);
 
         const menuContext = menuRes.data?.map(i => `- ${i.name} (${i.category}${i.subcategory ? '/' + i.subcategory : ''}): ${i.price}. ${i.description}`).join('\n') || 'None';
         const eventsContext = eventsRes.data?.map(e => `- ${e.title} on ${e.date} at ${e.time}: ${e.description}`).join('\n') || 'No upcoming scheduled events';
         const artContext = artRes.data?.map(a => `- "${a.title}" (${a.medium}): ${a.price}`).join('\n') || 'Current exhibition by Elena Rossi';
         const staffContext = staffRes.data?.map(s => `- ${s.name}, ${s.role}: ${s.description}`).join('\n') || 'Our team of professional chefs available for hire';
+        const knowledgeContext = knowledgeRes.data?.map(k => `### ${k.category}\n${k.content}`).join('\n\n') || '';
 
         const systemInstruction = `
 You are the AI Concierge for 'Ravinteli Olkkari', a premium dining 'living room' in Helsinki. 
@@ -43,7 +45,8 @@ You represent a high-end restaurant experience that feels like a home living roo
 
 You are currently speaking with ${userName || 'a Guest'}.
 
-### CURRENT KNOWLEDGE BASE:
+### RESTAURANT INFORMATION & POLICIES:
+${knowledgeContext}
 
 **MENU ITEMS:**
 ${menuContext}

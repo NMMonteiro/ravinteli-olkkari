@@ -7,7 +7,7 @@ import { MemberGate } from '../components/MemberGate';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
-type AdminView = 'dashboard' | 'menu' | 'wine' | 'staff' | 'events' | 'art' | 'bookings';
+type AdminView = 'dashboard' | 'menu' | 'wine' | 'staff' | 'events' | 'art' | 'bookings' | 'knowledge';
 
 interface AdminScreenProps {
   onOpenMenu: () => void;
@@ -45,7 +45,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       staff: 'staff',
       events: 'events',
       art: 'art_pieces',
-      bookings: 'bookings'
+      bookings: 'bookings',
+      knowledge: 'knowledge_base'
     };
 
     const { data, error } = await supabase
@@ -72,7 +73,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       staff: 'staff',
       events: 'events',
       art: 'art_pieces',
-      bookings: 'bookings'
+      bookings: 'bookings',
+      knowledge: 'knowledge_base'
     };
 
     const { error } = await supabase
@@ -122,7 +124,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       staff: 'staff_images',
       wine: 'menu_images',
       events: 'menu_images',
-      art: 'menu_images'
+      art: 'menu_images',
+      knowledge: 'menu_images'
     };
 
     const bucket = bucketMap[activeView] || 'menu_images';
@@ -153,7 +156,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       staff: 'staff',
       events: 'events',
       art: 'art_pieces',
-      bookings: 'bookings'
+      bookings: 'bookings',
+      knowledge: 'knowledge_base'
     };
 
     const table = tableMap[activeView];
@@ -165,7 +169,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       staff: ['name', 'role', 'description', 'image', 'rate', 'badge'],
       events: ['title', 'date', 'time', 'description', 'image', 'type', 'is_tonight'],
       art: ['title', 'medium', 'price', 'image'],
-      bookings: ['customer_name', 'email', 'date', 'guests', 'location', 'message', 'status']
+      bookings: ['customer_name', 'email', 'date', 'guests', 'location', 'message', 'status'],
+      knowledge: ['category', 'content']
     };
 
     const allowedColumns = tableColumns[activeView];
@@ -178,6 +183,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       // Fallback mappings
       else if (col === 'name' && formData.title) dataToSave.name = formData.title;
       else if (col === 'title' && formData.name) dataToSave.title = formData.name;
+      else if (col === 'category' && activeView === 'knowledge' && formData.name) dataToSave.category = formData.name;
     });
 
     // Mirror subcategory to type for wines to ensure display consistency
@@ -226,40 +232,46 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4 pb-10">
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Identity</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">
+              {activeView === 'knowledge' ? 'Topic / Category' : 'Identity'}
+            </label>
             <input
               type="text"
               className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
-              value={formData.name || formData.title || ''}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value })}
+              value={formData.name || formData.title || formData.category || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value, category: e.target.value })}
               required
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Visual Asset</label>
-            <div className="flex gap-4 items-center">
-              {formData.image && (
-                <div className="size-20 rounded-2xl bg-cover bg-center border border-white/10 flex-none" style={{ backgroundImage: `url("${formData.image}")` }}></div>
-              )}
-              <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-2xl h-20 flex flex-col items-center justify-center text-white/30 hover:bg-white/10 transition-colors group">
-                <span className="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">cloud_upload</span>
-                <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Archiving Image...' : 'Tap to Upload'}</span>
-                <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
-              </label>
+          {activeView !== 'knowledge' && (
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Visual Asset</label>
+              <div className="flex gap-4 items-center">
+                {formData.image && (
+                  <div className="size-20 rounded-2xl bg-cover bg-center border border-white/10 flex-none" style={{ backgroundImage: `url("${formData.image}")` }}></div>
+                )}
+                <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-2xl h-20 flex flex-col items-center justify-center text-white/30 hover:bg-white/10 transition-colors group">
+                  <span className="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">cloud_upload</span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest">{uploading ? 'Archiving Image...' : 'Tap to Upload'}</span>
+                  <input type="file" className="hidden" onChange={handleImageUpload} accept="image/*" />
+                </label>
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Valuation</label>
-              <input
-                type="text"
-                className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
-                value={formData.price || formData.rate || ''}
-                onChange={(e) => setFormData({ ...formData, price: e.target.value, rate: e.target.value })}
-              />
-            </div>
+            {activeView !== 'knowledge' && (
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Valuation</label>
+                <input
+                  type="text"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                  value={formData.price || formData.rate || ''}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value, rate: e.target.value })}
+                />
+              </div>
+            )}
 
             {activeView === 'menu' ? (
               <div className="space-y-1">
@@ -365,8 +377,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Contextual Information</label>
             <textarea
               className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white focus:border-accent-gold outline-none h-32 resize-none text-base"
-              value={formData.description || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              value={formData.description || formData.content || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value, content: e.target.value })}
             ></textarea>
           </div>
 
@@ -427,6 +439,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             { id: 'staff', label: 'Staff Hire', icon: 'supervisor_account' },
             { id: 'events', label: 'Live Events', icon: 'celebration' },
             { id: 'art', label: 'Art Gallery', icon: 'palette' },
+            { id: 'knowledge', label: 'Bot Context', icon: 'psychology' },
             { id: 'bookings', label: 'Inquiries', icon: 'description' }
           ].map((item) => (
             <button
@@ -452,6 +465,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
         (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.customer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.content || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.description || '').toLowerCase().includes(searchQuery.toLowerCase())
       );
 
@@ -528,14 +543,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <p className="text-white text-sm font-black truncate tracking-wide">{item.name || item.title || item.customer_name}</p>
+                  <p className="text-white text-sm font-black truncate tracking-wide">{item.name || item.title || item.customer_name || item.category}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {item.subcategory && (
                       <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20 backdrop-blur-sm">
                         {item.subcategory}
                       </span>
                     )}
-                    <p className="text-white/40 text-[10px] truncate font-medium italic">{item.description || item.role || item.date}</p>
+                    <p className="text-white/40 text-[10px] truncate font-medium italic">{item.description || item.role || item.date || item.content}</p>
                   </div>
                 </div>
                 <div className="flex gap-1">
