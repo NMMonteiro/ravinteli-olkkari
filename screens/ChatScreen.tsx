@@ -113,7 +113,34 @@ const ChatScreen: React.FC = () => {
                   msg.text
                 ) : (
                   <div className="prose dark:prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-strong:text-accent-gold prose-strong:font-bold prose-ul:my-2 prose-li:my-0.5">
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    <ReactMarkdown
+                      components={{
+                        a: ({ node, ...props }) => {
+                          const isInternal = props.href?.startsWith('/');
+                          if (isInternal) {
+                            return (
+                              <button
+                                onClick={() => navigate(props.href!)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent-gold/10 text-accent-gold font-bold hover:bg-accent-gold/20 transition-colors border border-accent-gold/20 my-1"
+                              >
+                                <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                {props.children}
+                              </button>
+                            );
+                          }
+                          return (
+                            <a
+                              {...props}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-accent-gold underline font-medium"
+                            />
+                          );
+                        }
+                      }}
+                    >
+                      {msg.text}
+                    </ReactMarkdown>
                   </div>
                 )}
               </div>
