@@ -16,7 +16,7 @@ const ChatScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'bot',
-      text: user ? `Welcome back, ${user.user_metadata?.full_name || user.email?.split('@')[0]}! How can I assist your culinary journey at Olkkari today?` : "Welcome to Ravinteli Olkkari! I'm your digital host. How can I assist your culinary journey today?"
+      text: user ? `Welcome back, ${user.user_metadata?.full_name || user.email?.split('@')[0]}! How can I assist your culinary journey at Olkkari today? (v1.2)` : "Welcome to Ravinteli Olkkari! I'm your digital host. How can I assist your culinary journey today? (v1.2)"
     }
   ]);
   const [input, setInput] = useState('');

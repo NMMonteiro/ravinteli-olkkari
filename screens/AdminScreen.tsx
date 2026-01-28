@@ -149,7 +149,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
   const syncWebsite = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('sync-website-context');
+      const { data, error } = await supabase.functions.invoke('sync-website-now');
       if (error) throw error;
       alert('Website context synchronized successfully!');
       fetchItems();
