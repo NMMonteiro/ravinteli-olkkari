@@ -40,32 +40,15 @@ const ChatScreen: React.FC = () => {
     setLoading(true);
 
     try {
-      // Map local messages to the role format Gemini expects (user/model)
-      // IMPORTANT: Conversations must start with a 'user' message for Gemini.
-      // We skip the initial bot greeting message.
-      const chatHistory = messages
-        .filter((_, index) => index > 0) // Skip the very first message which is the bot's auto-greeting
-        .map(msg => ({
-          role: msg.role === 'bot' ? 'model' : 'user',
-          parts: [{ text: msg.text }]
-        }));
-
       const { data, error } = await supabase.functions.invoke('gemini-chat', {
-        body: {
-          message: userMessage,
-          chatHistory: chatHistory,
-          userName: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Guest'
-        }
+        body: { message: userMessage }
       });
 
       if (error) throw error;
-
-      const text = data?.reply || "I apologize, but I'm having a bit of trouble connecting to our kitchen right now.";
-
-      setMessages(prev => [...prev, { role: 'bot', text }]);
-    } catch (error) {
-      console.error('Chat error:', error);
-      setMessages(prev => [...prev, { role: 'bot', text: "I apologize, but I'm having a bit of trouble connecting to our kitchen right now. Please try again or call us directly!" }]);
+      setMessages(prev => [...prev, { role: 'bot', text: data.reply }]);
+    } catch (err: any) {
+      console.error('Chat Error:', err);
+      setMessages(prev => [...prev, { role: 'bot', text: "Technical error connecting to our kitchen." }]);
     } finally {
       setLoading(false);
     }
