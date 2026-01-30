@@ -166,10 +166,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                           </div>
                           <div className="text-right">
                             {wine.price_glass && wine.price_glass !== '-' && (
-                              <p className="text-accent-gold font-bold text-sm">Glass {wine.price_glass}€</p>
+                              <p className="text-accent-gold font-bold text-sm">Price Glass 12cl {wine.price_glass}€</p>
                             )}
                             {wine.price_bottle && wine.price_bottle !== '-' && (
-                              <p className="text-accent-gold font-bold">Bottle {wine.price_bottle}€</p>
+                              <p className="text-accent-gold font-bold">Price Bottle {wine.price_bottle}€</p>
                             )}
                           </div>
                         </div>
@@ -315,13 +315,13 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                   <div className="text-right flex flex-col items-end">
                     {isWine(selectedItem) && selectedItem.price_glass && selectedItem.price_glass !== '-' && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold">Glass</span>
+                        <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold whitespace-nowrap">Price Glass 12cl</span>
                         <div className="text-lg font-black text-accent-gold drop-shadow-xl">{selectedItem.price_glass}€</div>
                       </div>
                     )}
                     {isWine(selectedItem) && selectedItem.price_bottle && selectedItem.price_bottle !== '-' && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold">Bottle</span>
+                        <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold whitespace-nowrap">Price Bottle</span>
                         <div className="text-2xl font-black text-accent-gold drop-shadow-xl">{selectedItem.price_bottle}€</div>
                       </div>
                     )}
