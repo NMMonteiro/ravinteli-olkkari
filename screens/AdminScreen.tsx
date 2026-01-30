@@ -444,7 +444,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
         <form onSubmit={handleSubmit} className="space-y-4 pb-10">
           <div className="space-y-1">
             <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">
-              {activeView === 'knowledge' ? 'Topic / Category' : 'Identity'}
+              {activeView === 'knowledge' ? 'Topic / Category' : `Identity (DEBUG: ${activeView})`}
             </label>
             <input
               type="text"
