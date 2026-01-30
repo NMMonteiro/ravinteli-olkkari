@@ -227,7 +227,7 @@ const BookingScreen: React.FC<BookingScreenProps> = ({ onOpenMenu }) => {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto mt-4 pb-32">
+        <div className="flex-1 overflow-y-auto mt-4 pb-32 max-w-2xl mx-auto w-full">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div

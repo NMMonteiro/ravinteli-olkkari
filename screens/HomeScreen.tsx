@@ -86,7 +86,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onOpenMenu }) => {
     <div className="min-h-screen text-white font-display pb-20">
       <Header onOpenMenu={onOpenMenu} />
 
-      <main className="flex flex-col gap-4 p-4 mt-2">
+      <main className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4 mt-2 max-w-7xl mx-auto">
         {cards.map((card, idx) => (
           <HomeCard
             key={card.title}

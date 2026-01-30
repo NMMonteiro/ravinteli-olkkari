@@ -130,7 +130,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="grid grid-cols-1 gap-4"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto"
                 >
                   {wines.length === 0 ? (
                     <div className="py-20 text-center opacity-40 italic text-sm">No selection in this category yet.</div>
@@ -184,7 +184,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex flex-col gap-4"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto"
                 >
                   {menuItems.length === 0 ? (
                     <div className="py-20 text-center opacity-40 italic text-sm font-montserrat font-light">No selection in this category yet.</div>

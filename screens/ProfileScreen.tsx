@@ -195,7 +195,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ onOpenMenu }) => {
             <div className="min-h-screen text-white font-display pb-32">
                 <Header onOpenMenu={onOpenMenu} title={isAdmin ? "Admin Profile" : "Member Profile"} />
 
-                <main className="p-6 max-w-lg mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <main className="p-6 max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     {/* Hero Section */}
                     <div className="flex flex-col items-center gap-6 text-center">
                         <div className="relative group">

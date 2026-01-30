@@ -40,7 +40,7 @@ export const Navigation: React.FC = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-t border-white/5 pb-6 pt-2 px-6">
-      <div className="flex justify-around items-center max-w-lg mx-auto">
+      <div className="flex justify-around items-center max-w-2xl mx-auto">
         {navs.map((nav) => (
           <NavItem
             key={nav.label}

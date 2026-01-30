@@ -76,7 +76,7 @@ const ChatScreen: React.FC = () => {
   return (
     <div className="min-h-screen text-gray-900 dark:text-white font-display flex flex-col">
       <header className="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-gray-200 dark:border-white/5">
-        <div className="flex items-center p-4 py-3 justify-between">
+        <div className="flex items-center p-4 py-3 justify-between max-w-2xl mx-auto">
           <div onClick={() => navigate(-1)} className="text-primary dark:text-accent-gold flex size-12 shrink-0 items-center justify-start cursor-pointer">
             <span className="material-symbols-outlined">chevron_left</span>
           </div>
@@ -94,7 +94,7 @@ const ChatScreen: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-6 pb-40">
+      <main className="flex-1 overflow-y-auto p-4 space-y-6 pb-40 max-w-2xl mx-auto w-full">
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex items-end gap-3 ${msg.role === 'user' ? 'justify-end ml-auto max-w-[85%]' : 'max-w-[85%]'}`}>
             {msg.role === 'bot' && (
@@ -172,7 +172,7 @@ const ChatScreen: React.FC = () => {
       </main>
 
       <div className="fixed bottom-[84px] left-0 right-0 z-10 bg-gradient-to-t from-background-dark via-background-dark/95 to-transparent pt-10">
-        <div className="flex gap-2.5 px-4 pb-4 overflow-x-auto no-scrollbar mx-auto max-w-lg">
+        <div className="flex gap-2.5 px-4 pb-4 overflow-x-auto no-scrollbar mx-auto max-w-2xl">
           <button
             onClick={() => navigate('/menu')}
             className="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white dark:bg-chat-bot border border-gray-200 dark:border-white/10 px-4 shadow-sm active:scale-95 transition-transform"
@@ -196,7 +196,7 @@ const ChatScreen: React.FC = () => {
           </button>
         </div>
 
-        <div className="px-4 pb-4 max-w-lg mx-auto">
+        <div className="px-4 pb-4 max-w-2xl mx-auto">
           <div className="relative flex items-center">
             <input
               className="w-full bg-white dark:bg-[#251b1c] border-gray-200 dark:border-white/5 rounded-full py-3.5 pl-5 pr-14 text-sm focus:ring-accent-gold focus:border-accent-gold dark:text-white placeholder-gray-400 shadow-lg"

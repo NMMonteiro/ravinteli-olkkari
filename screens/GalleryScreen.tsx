@@ -88,7 +88,7 @@ const GalleryScreen: React.FC<GalleryScreenProps> = ({ onOpenMenu }) => {
             <p className="text-accent-gold font-medium animate-pulse">Curating gallery...</p>
           </div>
         ) : (
-          <div className="space-y-4 px-4 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4 px-4 pb-6 max-w-7xl mx-auto">
             {artCollection.map((piece) => (
               <div key={piece.id} className="flex flex-col items-stretch justify-start rounded-xl shadow-lg bg-white dark:bg-[#2d2021] border border-primary/5 overflow-hidden">
                 <div

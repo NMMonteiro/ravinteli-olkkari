@@ -145,7 +145,7 @@ const EventsScreen: React.FC<EventsScreenProps> = ({ onOpenMenu }) => {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex flex-col gap-6 p-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 max-w-7xl mx-auto"
           >
             <AnimatePresence>
               {events.map((event, idx) => (

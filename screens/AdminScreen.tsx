@@ -713,12 +713,12 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
   const renderDashboard = () => (
     <>
-      <div className="px-6 pt-6">
+      <div className="px-6 pt-6 max-w-7xl mx-auto">
         <h1 className="text-3xl font-black text-white italic uppercase tracking-tight">Manager Suite</h1>
         <p className="text-accent-gold/60 text-[10px] font-black uppercase tracking-[0.3em] mt-2 mb-6">Concierge Operations</p>
       </div>
 
-      <div className="flex overflow-x-auto gap-4 px-6 mb-8 no-scrollbar">
+      <div className="flex overflow-x-auto gap-4 px-6 mb-8 no-scrollbar max-w-7xl mx-auto">
         <div className="flex min-w-[160px] flex-1 flex-col gap-4 rounded-[2rem] p-6 bg-accent-gold text-primary shadow-2xl relative overflow-hidden group">
           <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:scale-110 transition-transform">loyalty</span>
           <span className="material-symbols-outlined text-3xl">loyalty</span>
@@ -738,7 +738,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
         </div>
       </div>
 
-      <div className="px-6 pb-12">
+      <div className="px-6 pb-12 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6 px-1">
           <h2 className="text-white text-xs font-black uppercase tracking-[0.3em] opacity-40">Management Controls</h2>
           <button
@@ -749,7 +749,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[
             { id: 'menu', label: 'Menu Items', icon: 'restaurant_menu' },
             { id: 'wine', label: 'Wine Cellar', icon: 'wine_bar' },
@@ -857,7 +857,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             </p>
           </div>
         ) : (
-          <div className="space-y-6 pb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20 max-w-7xl mx-auto">
             {filteredItems.map((item) => (
               <div key={item.id} className="flex flex-col gap-4 bg-card-dark p-6 rounded-[2.5rem] border border-white/5 shadow-xl group animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex items-start justify-between">

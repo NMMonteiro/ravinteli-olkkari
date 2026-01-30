@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMenu, showBack, title }) =
 
     return (
         <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/5">
-            <div className="flex items-center p-4 py-3 justify-between">
+            <div className="flex items-center p-4 py-3 justify-between max-w-7xl mx-auto">
                 <div className="flex size-12 shrink-0 items-center justify-start">
                     {showBack ? (
                         <span onClick={() => navigate(-1)} className="material-symbols-outlined cursor-pointer text-white hover:text-accent-gold transition-colors">arrow_back_ios_new</span>

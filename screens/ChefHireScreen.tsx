@@ -192,7 +192,7 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
         {loading ? (
           <div className="py-20 text-center animate-pulse text-accent-gold">Loading Crew...</div>
         ) : (
-          <div className="px-4 py-4 grid grid-cols-1 gap-8">
+          <div className="px-4 py-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {staffList.map((staff) => (
               <div key={staff.id} className="bg-primary/20 rounded-[32px] border border-white/5 overflow-hidden group">
                 <div className="relative aspect-[4/5]">
