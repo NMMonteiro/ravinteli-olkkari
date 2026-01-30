@@ -472,9 +472,9 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            {activeView !== 'knowledge' && activeView !== 'wine' && (
+            {activeView.toLowerCase() !== 'knowledge' && activeView.toLowerCase() !== 'wine' && (
               <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Valuation</label>
+                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Valuation (Standard)</label>
                 <input
                   type="text"
                   className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
@@ -484,7 +484,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
               </div>
             )}
 
-            {activeView === 'wine' && (
+            {activeView.toLowerCase() === 'wine' && (
               <>
                 <div className="space-y-1">
                   <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Price Glass 12cl</label>
