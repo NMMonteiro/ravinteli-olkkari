@@ -138,7 +138,13 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     };
 
     const bucket = bucketMap[activeView] || 'menu_images';
-    const filePath = `${Date.now()}_${file.name}`;
+    // Sanitize file name: remove special characters, replace spaces with underscores, and normalize
+    const sanitizedName = file.name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[^a-zA-Z0-9.\-_]/g, '_'); // Replace everything else with _
+
+    const filePath = `${Date.now()}_${sanitizedName}`;
 
     const { error } = await supabase.storage
       .from(bucket)
