@@ -310,7 +310,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                         </span>
                       )
                     )}
-                    <h2 className="text-4xl font-black text-white italic uppercase tracking-tight leading-none drop-shadow-xl">{selectedItem.name}</h2>
+                    <h2 className="text-2xl font-black text-white italic uppercase tracking-tight leading-loose drop-shadow-xl">{selectedItem.name}</h2>
                   </div>
                   <div className="text-right flex flex-col items-end">
                     {isWine(selectedItem) && selectedItem.price_glass && selectedItem.price_glass !== '-' && (

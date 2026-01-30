@@ -375,7 +375,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     // Explicitly define columns to save for each table to avoid payload errors
     const tableColumns: Record<string, string[]> = {
       menu: ['name', 'price', 'description', 'image', 'is_chef_choice', 'category', 'subcategory'],
-      wine: ['name', 'year', 'region', 'type', 'subcategory', 'price', 'description', 'image', 'is_sommelier_choice'],
+      wine: ['name', 'year', 'region', 'type', 'subcategory', 'price_glass', 'price_bottle', 'description', 'image', 'is_sommelier_choice'],
       staff: ['name', 'role', 'description', 'image', 'rate', 'badge'],
       events: ['title', 'date', 'time', 'description', 'image', 'type', 'is_tonight'],
       art: ['title', 'medium', 'price', 'image'],
@@ -472,7 +472,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           )}
 
           <div className="grid grid-cols-2 gap-4">
-            {activeView !== 'knowledge' && (
+            {activeView !== 'knowledge' && activeView !== 'wine' && (
               <div className="space-y-1">
                 <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Valuation</label>
                 <input
@@ -482,6 +482,31 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                   onChange={(e) => setFormData({ ...formData, price: e.target.value, rate: e.target.value })}
                 />
               </div>
+            )}
+
+            {activeView === 'wine' && (
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Price Glass 12cl</label>
+                  <input
+                    type="text"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                    placeholder="e.g. 9"
+                    value={formData.price_glass || ''}
+                    onChange={(e) => setFormData({ ...formData, price_glass: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Price Bottle</label>
+                  <input
+                    type="text"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                    placeholder="e.g. 58"
+                    value={formData.price_bottle || ''}
+                    onChange={(e) => setFormData({ ...formData, price_bottle: e.target.value })}
+                  />
+                </div>
+              </>
             )}
 
             {activeView === 'menu' ? (
@@ -855,12 +880,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                       </div>
                     )}
                   </div>
-                  <div className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border backdrop-blur-md ${item.status === 'Confirmed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                    item.status === 'Refused' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
-                      'bg-accent-gold/10 text-accent-gold border-accent-gold/20'
-                    }`}>
-                    {item.status || 'Pending'}
-                  </div>
+                  {activeView !== 'wine' && (
+                    <div className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border backdrop-blur-md ${item.status === 'Confirmed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                      item.status === 'Refused' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
+                        'bg-accent-gold/10 text-accent-gold border-accent-gold/20'
+                      }`}>
+                      {item.status || 'Pending'}
+                    </div>
+                  )}
                 </div>
 
                 {activeView === 'bookings' && (
