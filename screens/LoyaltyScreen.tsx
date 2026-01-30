@@ -14,7 +14,7 @@ interface LoyaltyScreenProps {
 
 const LoyaltyScreen: React.FC<LoyaltyScreenProps> = ({ onOpenMenu }) => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const [newPassword, setNewPassword] = useState('');
   const [settingPassword, setSettingPassword] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
@@ -83,10 +83,13 @@ const LoyaltyScreen: React.FC<LoyaltyScreenProps> = ({ onOpenMenu }) => {
                 <div>
                   <div className="flex justify-between items-end mb-3 px-1">
                     <p className="text-accent-gold text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Reward Progress</p>
-                    <p className="text-white text-xs font-bold">350 / 500 PTS</p>
+                    <p className="text-white text-xs font-bold">{profile?.loyalty_points || 0} / 500 PTS</p>
                   </div>
                   <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                    <div className="h-full rounded-full bg-accent-gold animate-pulse shadow-[0_0_15px_rgba(197,160,89,0.5)]" style={{ width: '70%' }}></div>
+                    <div
+                      className="h-full rounded-full bg-accent-gold animate-pulse shadow-[0_0_15px_rgba(197,160,89,0.5)] transition-all duration-1000"
+                      style={{ width: `${Math.min(((profile?.loyalty_points || 0) / 500) * 100, 100)}%` }}
+                    ></div>
                   </div>
                 </div>
 
@@ -159,7 +162,11 @@ const LoyaltyScreen: React.FC<LoyaltyScreenProps> = ({ onOpenMenu }) => {
                   <span className="material-symbols-outlined text-[10px] text-accent-gold">stars</span>
                   <p className="text-accent-gold font-black text-[10px] uppercase tracking-widest">500 PTS</p>
                 </div>
-                <button className="w-full mt-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Insufficient Points</button>
+                {(profile?.loyalty_points || 0) >= 500 ? (
+                  <button className="w-full mt-4 py-3 rounded-xl bg-accent-gold text-primary text-[10px] font-black uppercase tracking-widest shadow-lg shadow-accent-gold/20 active:scale-95 transition-all">Redeem Reward</button>
+                ) : (
+                  <button className="w-full mt-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white/40 text-[10px] font-black uppercase tracking-widest cursor-not-allowed">Insufficient Points</button>
+                )}
               </div>
             </div>
           </div>

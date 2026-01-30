@@ -2,6 +2,15 @@
 @config "./tailwind.config.js";
 
 @layer base {
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
   body {
     font-family: 'Work Sans', sans-serif;
     -webkit-tap-highlight-color: transparent;
@@ -13,6 +22,7 @@
     width: 100%;
     -webkit-text-size-adjust: 100%;
     touch-action: manipulation;
+    scroll-behavior: smooth;
   }
 
   select {

@@ -70,11 +70,6 @@ const WelcomeScreen: React.FC = () => {
             {/* Background Overlay */}
             <div className="absolute inset-0 bg-black/20"></div>
 
-            {/* Standardized Logo for Seamless Transition from Splash */}
-            <div className="absolute top-24 left-1/2 -translate-x-1/2 z-20 w-64 flex justify-center">
-                <img src={LOGO_URL} alt="Olkkari" className="w-full h-auto object-contain drop-shadow-[0_0_25px_rgba(197,160,89,0.5)]" />
-            </div>
-
             {/* Content with Fade-In Transition */}
             <div className="relative z-10 h-full flex flex-col items-center justify-between py-12 px-8">
                 {/* Top Actions - Fades In */}
@@ -84,10 +79,16 @@ const WelcomeScreen: React.FC = () => {
                     </button>
                 </div>
 
-                {/* Sub-Branding - Fixed position relative to standard logo placement */}
-                <div className="mt-40 flex flex-col items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-                    <div className="w-12 h-px bg-accent-gold/40"></div>
-                    <p className="text-white text-[10px] font-montserrat font-light tracking-[0.5em] uppercase opacity-60">The Culinary Society</p>
+                {/* Center Branding Group */}
+                <div className="flex flex-col items-center gap-8 animate-in fade-in zoom-in-95 duration-1000 delay-200">
+                    <div className="w-64 flex justify-center">
+                        <img src={LOGO_URL} alt="Olkkari" className="w-full h-auto object-contain drop-shadow-[0_0_25px_rgba(197,160,89,0.3)]" />
+                    </div>
+
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-12 h-px bg-accent-gold/40"></div>
+                        <p className="text-white text-[10px] font-montserrat font-light tracking-[0.5em] uppercase opacity-60 text-center">The Culinary Society</p>
+                    </div>
                 </div>
 
                 {/* Bottom Actions - Fades In */}

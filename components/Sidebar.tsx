@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGO_URL } from '../constants';
+import { useAuth } from '../hooks/useAuth';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -9,8 +10,9 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
+    const { isAdmin } = useAuth();
 
-    const navItems = [
+    const allNavItems = [
         { label: 'Home', icon: 'home', path: '/home' },
         { label: 'Menu', icon: 'restaurant_menu', path: '/menu' },
         { label: 'Events', icon: 'celebration', path: '/events' },
@@ -21,6 +23,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { label: 'Profile', icon: 'person', path: '/profile' },
         { label: 'Admin', icon: 'admin_panel_settings', path: '/admin' },
     ];
+
+    const navItems = allNavItems.filter(item => {
+        if (item.label === 'Admin') return isAdmin;
+        return true;
+    });
 
     const handleNav = (path: string) => {
         navigate(path);

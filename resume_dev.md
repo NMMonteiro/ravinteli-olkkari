@@ -51,6 +51,28 @@
 - **Typography Standardization**: Shifted key UI elements to the Montserrat font family (weights 300, 700, 900) to maintain a boutique editorial feel.
 - **AI-Driven Customer Support**: The concierge now provides accurate answers about opening hours, location, and philosophy directly from the website data.
 
+## Phase 5: Member Residency & Governance
+**Status:** Completed
+**Date:** 2026-01-28
+
+### Actions Taken:
+- **Member Residency Hub**: Re-engineered the `ProfileScreen` into a comprehensive member portal featuring avatar synchronization, booking history, and validation tracking.
+- **Archive Profiles**: Established a `profiles` table in Supabase linked via triggers to Auth, allowing for permanent metadata storage and admin-controlled permissions.
+- **Admin Governance Suite**: Expanded the Manager Suite with a specialized "Society Members" module, enabling real-time approval/refusal of new candidates and privilege escalation (Admin roles).
+- **Validation Gateways**: Implemented advanced routing logic in `MemberGate` to enforce multi-tiered access (Guest → Member → Approved Member → Admin).
+- **Asset Portals**: Configured dedicated Supabase Storage buckets for `avatars`, ensuring efficient and secure profile image management.
+
+## Phase 6: Loyalty Rewards & Deterministic Security
+**Status:** Completed
+**Date:** 2026-01-28
+
+### Actions Taken:
+- **Unbreakable Auth Architecture**: Engineered a deterministic identity system that eliminates session flickering. The app now performs a 3-tier deep sync (Session → JWT Metadata → Database Registry), recognizing management and residents instantly before the UI even renders.
+- **Society Loyalty Engine**: Launched the resident rewards system (1€ = 1 Point). Integrated points tracking into the `profiles` registry and added automated reward unlocking (e.g., Signature Cocktail at 500 PTS) with dynamic progress visualization.
+- **Accounting & Audit Suite**: Upgraded the Admin panel with a receipt audit engine. It now handles European decimal formats (commas/dots) and features "Fuzzy Match" logic to link guest bookings to registered profiles automatically.
+- **UX Transparency Gate**: Improved `MemberGate` to distinguish between "Guest" and "Pending Resident". Authenticated users awaiting approval now see a status update instead of receiving redundant login prompts.
+- **Database Identity Realignment**: Synchronized inconsistent User IDs across the registry, elevating primary management accounts to absolute administrative status.
+
 ## Next Steps:
 - **Deep Performance Audit**: Review image assets and transition timings for ultra-low latency mobile experience.
 - **OneSignal Integration**: Complete the push notification loop for real-time booking updates.

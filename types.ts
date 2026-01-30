@@ -46,9 +46,11 @@ export interface Wine {
   region?: string;
   type?: string;
   subcategory?: string;
-  price: string;
+  price_glass?: string;
+  price_bottle?: string;
   description?: string;
   image?: string;
+  isSommelierChoice?: boolean;
 }
 
 export interface ChatMessage {
@@ -56,4 +58,32 @@ export interface ChatMessage {
   sender: 'bot' | 'user';
   text: string | React.ReactNode;
   image?: string;
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role: 'member' | 'admin';
+  is_approved: boolean;
+  loyalty_points?: number;
+  created_at: string;
+}
+
+export interface Booking {
+  id: number;
+  customer_name: string;
+  email: string;
+  date: string;
+  time: string;
+  guests: number;
+  special_requests?: string;
+  status: string;
+  user_id?: string;
+  receipt_url?: string;
+  receipt_data?: any;
+  points_awarded?: boolean;
+  created_at?: string;
+  phone?: string;
 }

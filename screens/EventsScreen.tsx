@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase';
 import { EventItem } from '../types';
 import { Header } from '../components/Header';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface EventsScreenProps {
   onOpenMenu: () => void;
@@ -141,72 +142,84 @@ const EventsScreen: React.FC<EventsScreenProps> = ({ onOpenMenu }) => {
             <p className="text-accent-gold font-medium animate-pulse">Loading Events...</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-6 p-4">
-            {events.map((event) => (
-              <div key={event.id} className="flex flex-col items-stretch justify-start rounded-xl overflow-hidden bg-burgundy-accent/20 backdrop-blur-md shadow-2xl border border-white/5">
-                <div
-                  className="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover"
-                  style={{ backgroundImage: `url("${event.image}")` }}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col gap-6 p-4"
+          >
+            <AnimatePresence>
+              {events.map((event, idx) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1, duration: 0.5, ease: "easeOut" }}
+                  className="flex flex-col items-stretch justify-start rounded-xl overflow-hidden bg-burgundy-accent/20 backdrop-blur-md shadow-2xl border border-white/5"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                  {event.isTonight && (
-                    <div className="absolute top-3 left-3 bg-accent-gold text-black text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-lg">Tonight</div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-1 p-5">
-                  <p className="text-white text-xl font-bold leading-tight tracking-tight uppercase italic">{event.title}</p>
-                  <p className="text-accent-gold text-xs font-black mt-1 flex items-center gap-1 uppercase tracking-widest">
-                    <span className="material-symbols-outlined text-[14px]">calendar_today</span>
-                    {event.date} • {event.time}
-                  </p>
-                  <p className="text-warm-ivory/60 text-xs font-montserrat font-light leading-relaxed mt-2 line-clamp-2">
-                    {event.description}
-                  </p>
-                  <div className="flex gap-2 mt-5">
-                    <button
-                      onClick={() => downloadIcs(event)}
-                      className="flex-1 flex cursor-pointer items-center justify-center rounded-lg h-12 bg-white/5 border border-white/10 text-white gap-2 text-[10px] font-black uppercase tracking-[0.2em] active:bg-white/10 transition-all shadow-md"
-                    >
-                      <span className="material-symbols-outlined text-[18px] text-accent-gold">calendar_add_on</span>
-                      <span>Calendar</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const monthsMap: Record<string, string> = {
-                          'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06',
-                          'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
-                        };
-                        let passDate = event.date;
-                        if (!passDate.includes('-')) {
-                          const parts = passDate.trim().toUpperCase().split(/[\s,]+/);
-                          let m = '01';
-                          let d = '01';
+                  <div
+                    className="relative w-full aspect-[16/9] bg-center bg-no-repeat bg-cover"
+                    style={{ backgroundImage: `url("${event.image}")` }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                    {event.isTonight && (
+                      <div className="absolute top-3 left-3 bg-accent-gold text-black text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded shadow-lg">Tonight</div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 p-5">
+                    <p className="text-white text-xl font-bold leading-tight tracking-tight uppercase italic">{event.title}</p>
+                    <p className="text-accent-gold text-xs font-black mt-1 flex items-center gap-1 uppercase tracking-widest">
+                      <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                      {event.date} • {event.time}
+                    </p>
+                    <p className="text-warm-ivory/60 text-xs font-montserrat font-light leading-relaxed mt-2 line-clamp-2">
+                      {event.description}
+                    </p>
+                    <div className="flex gap-2 mt-5">
+                      <button
+                        onClick={() => downloadIcs(event)}
+                        className="flex-1 flex cursor-pointer items-center justify-center rounded-lg h-12 bg-white/5 border border-white/10 text-white gap-2 text-[10px] font-black uppercase tracking-[0.2em] active:bg-white/10 transition-all shadow-md"
+                      >
+                        <span className="material-symbols-outlined text-[18px] text-accent-gold">calendar_add_on</span>
+                        <span>Calendar</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const monthsMap: Record<string, string> = {
+                            'JAN': '01', 'FEB': '02', 'MAR': '03', 'APR': '04', 'MAY': '05', 'JUN': '06',
+                            'JUL': '07', 'AUG': '08', 'SEP': '09', 'OCT': '10', 'NOV': '11', 'DEC': '12'
+                          };
+                          let passDate = event.date;
+                          if (!passDate.includes('-')) {
+                            const parts = passDate.trim().toUpperCase().split(/[\s,]+/);
+                            let m = '01';
+                            let d = '01';
 
-                          // Find month and day in parts
-                          for (const part of parts) {
-                            if (monthsMap[part]) {
-                              m = monthsMap[part];
-                            } else {
-                              const num = part.replace(/\D/g, '');
-                              if (num && num.length <= 2) {
-                                d = num.padStart(2, '0');
+                            // Find month and day in parts
+                            for (const part of parts) {
+                              if (monthsMap[part]) {
+                                m = monthsMap[part];
+                              } else {
+                                const num = part.replace(/\D/g, '');
+                                if (num && num.length <= 2) {
+                                  d = num.padStart(2, '0');
+                                }
                               }
                             }
+                            passDate = `2026-${m}-${d}`;
                           }
-                          passDate = `2026-${m}-${d}`;
-                        }
-                        navigate('/booking', { state: { eventDate: passDate, eventTitle: event.title } });
-                      }}
-                      className="flex-1 flex cursor-pointer items-center justify-center rounded-lg h-12 bg-accent-gold text-primary gap-2 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-accent-gold/20 active:scale-95 transition-all"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">restaurant</span>
-                      <span>Book Table</span>
-                    </button>
+                          navigate('/booking', { state: { eventDate: passDate, eventTitle: event.title } });
+                        }}
+                        className="flex-1 flex cursor-pointer items-center justify-center rounded-lg h-12 bg-accent-gold text-primary gap-2 text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-accent-gold/20 active:scale-95 transition-all"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">restaurant</span>
+                        <span>Book Table</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </main>
 

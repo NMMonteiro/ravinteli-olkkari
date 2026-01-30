@@ -208,14 +208,10 @@ const ChefHireScreen: React.FC<ChefHireScreenProps> = ({ onOpenMenu }) => {
                 </div>
                 <div className="p-8 bg-black/20">
                   <p className="text-white/50 text-sm leading-relaxed mb-8 italic">"{staff.description}"</p>
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <span className="text-white/30 text-[9px] uppercase font-bold tracking-widest block">Day Rate</span>
-                      <span className="text-2xl font-black text-white">{staff.rate}<span className="text-xs text-white/30 ml-1">/hr</span></span>
-                    </div>
+                  <div className="flex items-center justify-end mb-8">
                     <button
                       onClick={() => setSelectedStaff(staff)}
-                      className="bg-accent-gold text-primary px-6 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all text-center"
+                      className="w-full bg-accent-gold text-primary px-6 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest active:scale-95 transition-all text-center"
                     >
                       Book Availability
                     </button>

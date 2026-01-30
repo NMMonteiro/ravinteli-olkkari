@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 
 const OnboardingScreen: React.FC = () => {
     const navigate = useNavigate();
-    const { user, isMember, loading } = useAuth();
+    const { user, profile, isMember, loading } = useAuth();
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [step, setStep] = useState(1);
@@ -16,27 +16,52 @@ const OnboardingScreen: React.FC = () => {
         if (!loading && !isMember) {
             navigate('/welcome');
         }
-        if (user?.user_metadata?.onboarding_complete) {
+        // Use the profile role as the trigger for completion instead of metadata
+        if (profile) {
             navigate('/home');
         }
-    }, [user, isMember, loading, navigate]);
+    }, [profile, isMember, loading, navigate]);
 
     const handleComplete = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
 
         try {
+            // Updated admin list to match useAuth and handle_new_user trigger fallback
+            const adminEmails = [
+                'ps.olkkari@gmail.com',
+                'zanebiske@gmail.com',
+                'nuno@learnmera.com',
+                'nunommonteiro1972@gmail.com',
+                'nuno@tropicalastral.com'
+            ];
+            const isAdmin = adminEmails.includes(user?.email || '');
+
             // Update metadata and password
             const { error: metaError } = await supabase.auth.updateUser({
                 data: {
                     full_name: name,
                     onboarding_complete: true,
-                    role: user?.email === 'ps.olkkari@gmail.com' ? 'admin' : 'member'
+                    role: isAdmin ? 'admin' : 'member',
+                    is_approved: isAdmin // Admins are auto-approved
                 },
                 password: password
             });
 
             if (metaError) throw metaError;
+
+            // Upsert into profiles table
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: user?.id,
+                    email: user?.email,
+                    full_name: name,
+                    role: isAdmin ? 'admin' : 'member',
+                    is_approved: isAdmin
+                });
+
+            if (profileError) console.error('Profile creation error:', profileError);
 
             navigate('/home');
         } catch (error: any) {

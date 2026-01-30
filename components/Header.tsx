@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LOGO_URL } from '../constants';
+import { useAuth } from '../hooks/useAuth';
 
 interface HeaderProps {
     onOpenMenu?: () => void;
@@ -10,6 +11,9 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenMenu, showBack, title }) => {
     const navigate = useNavigate();
+    const { user, profile } = useAuth();
+
+    const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.full_name || 'Resident'}`;
 
     return (
         <header className="sticky top-0 z-40 bg-black/20 backdrop-blur-md border-b border-white/5">
@@ -29,10 +33,14 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMenu, showBack, title }) =
 
                 <div className="flex w-12 items-center justify-end">
                     <button
-                        onClick={() => navigate('/admin')}
-                        className="flex items-center justify-center rounded-full h-10 w-10 bg-primary/40 text-accent-gold border border-accent-gold/20 hover:bg-primary/60 transition-colors"
+                        onClick={() => navigate('/profile')}
+                        className="flex items-center justify-center rounded-2xl h-10 w-10 bg-primary/40 border border-white/10 hover:border-accent-gold/40 transition-all overflow-hidden active:scale-90"
                     >
-                        <span className="material-symbols-outlined text-xl">person</span>
+                        <img
+                            src={avatarUrl}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                        />
                     </button>
                 </div>
             </div>
