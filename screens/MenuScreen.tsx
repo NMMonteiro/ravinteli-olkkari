@@ -147,7 +147,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                         className="h-48 bg-cover bg-center"
                         style={{ backgroundImage: `url("${wine.image}")` }}
                       >
-                        <div className="h-full w-full bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                        <div className="h-full w-full bg-gradient-to-t from-black/80 via-transparent to-transparent md:group-hover:opacity-0 transition-opacity duration-500 flex items-end p-4">
                           <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20 backdrop-blur-sm">
                             {wine.subcategory || wine.type}
                           </span>
@@ -157,19 +157,19 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="text-white text-lg font-bold">{wine.name}</h3>
+                              <h3 className="text-white text-lg font-bold drop-shadow-md">{wine.name}</h3>
                               {wine.isSommelierChoice && (
-                                <span className="material-symbols-outlined text-accent-gold text-lg fill-1">workspace_premium</span>
+                                <span className="material-symbols-outlined text-accent-gold text-lg fill-1 drop-shadow-md">workspace_premium</span>
                               )}
                             </div>
-                            <p className="text-accent-gold text-xs font-semibold">{wine.year} • {wine.region}</p>
+                            <p className="text-accent-gold text-xs font-semibold drop-shadow-md">{wine.year} • {wine.region}</p>
                           </div>
                           <div className="text-right">
                             {wine.price_glass && wine.price_glass !== '-' && (
-                              <p className="text-accent-gold font-bold text-sm">Price Glass 12cl {wine.price_glass}€</p>
+                              <p className="text-accent-gold font-bold text-sm drop-shadow-md">Price Glass 12cl {wine.price_glass}€</p>
                             )}
                             {wine.price_bottle && wine.price_bottle !== '-' && (
-                              <p className="text-accent-gold font-bold">Price Bottle {wine.price_bottle}€</p>
+                              <p className="text-accent-gold font-bold drop-shadow-md">Price Bottle {wine.price_bottle}€</p>
                             )}
                           </div>
                         </div>
@@ -222,13 +222,14 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                       </div>
 
                       {item.image && (
-                        <div className="absolute right-0 top-0 bottom-0 w-3/5 h-full pointer-events-none">
+                        <div className="absolute right-0 top-0 bottom-0 w-3/5 h-full pointer-events-none md:group-hover:w-full transition-all duration-700 ease-in-out">
                           <div
-                            className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"
+                            className="w-full h-full bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
                             style={{ backgroundImage: `url("${item.image}")` }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] via-[#2d2021] via-30% to-transparent"></div>
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] to-transparent opacity-60"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] via-[#2d2021] via-30% to-transparent md:group-hover:opacity-0 transition-opacity duration-500"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] to-transparent opacity-60 md:group-hover:opacity-0 transition-opacity duration-500"></div>
+                          <div className="absolute inset-0 bg-black/20 opacity-0 md:group-hover:opacity-100 transition-opacity duration-500"></div>
                         </div>
                       )}
                     </motion.div>
