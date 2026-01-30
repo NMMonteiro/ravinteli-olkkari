@@ -141,13 +141,13 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       onClick={() => setSelectedItem(wine)}
-                      className="flex flex-col bg-white dark:bg-primary/20 rounded-2xl overflow-hidden border border-white/5 shadow-lg group cursor-pointer active:scale-[0.98] transition-all duration-300 md:hover:scale-[1.03] md:hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] md:hover:border-accent-gold/40"
+                      className="flex flex-col bg-[#2d2021] rounded-2xl overflow-hidden border border-white/5 shadow-lg group cursor-pointer active:scale-[0.98] transition-all duration-300 md:hover:scale-[1.03] md:hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] md:hover:border-accent-gold/40"
                     >
                       <div
                         className="h-48 bg-cover bg-center"
                         style={{ backgroundImage: `url("${wine.image}")` }}
                       >
-                        <div className="h-full w-full bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+                        <div className="h-full w-full bg-gradient-to-t from-[#2d2021] via-transparent to-transparent flex items-end p-4">
                           <span className="bg-accent-gold/10 text-accent-gold text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded border border-accent-gold/20 backdrop-blur-sm">
                             {wine.subcategory || wine.type}
                           </span>
@@ -195,7 +195,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       onClick={() => setSelectedItem(item)}
-                      className="relative flex items-stretch min-h-[150px] rounded-2xl bg-burgundy-accent/80 backdrop-blur-md overflow-hidden border border-white/5 active:scale-[0.98] transition-all duration-300 group shadow-2xl cursor-pointer md:hover:scale-[1.02] md:hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] md:hover:border-accent-gold/40"
+                      className="relative flex items-stretch min-h-[150px] rounded-2xl bg-[#2d2021] overflow-hidden border border-white/5 active:scale-[0.98] transition-all duration-300 group shadow-2xl cursor-pointer md:hover:scale-[1.02] md:hover:shadow-[0_0_30px_rgba(212,175,55,0.2)] md:hover:border-accent-gold/40"
                     >
                       <div className="flex-1 p-6 z-10 flex flex-col justify-between relative">
                         <div className="space-y-1">
@@ -222,12 +222,12 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                       </div>
 
                       {item.image && (
-                        <div className="absolute right-0 top-0 bottom-0 w-3/5 h-full pointer-events-none">
+                        <div className="absolute inset-0 pointer-events-none">
                           <div
-                            className="w-full h-full bg-cover bg-center transition-transform duration-1000"
+                            className="absolute right-0 top-0 bottom-0 w-3/5 h-full bg-cover bg-center transition-transform duration-1000"
                             style={{ backgroundImage: `url("${item.image}")` }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] via-[#2d2021] via-30% to-transparent"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] via-[#2d2021] via-40% to-transparent"></div>
                           <div className="absolute inset-0 bg-gradient-to-r from-[#2d2021] to-transparent opacity-60"></div>
                         </div>
                       )}
