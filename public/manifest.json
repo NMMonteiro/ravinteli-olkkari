@@ -2,20 +2,20 @@
     "name": "Ravinteli Olkkari",
     "short_name": "Olkkari",
     "description": "Ravinteli Olkkari - Helsinki's Finest Society Living Room",
-    "start_url": "/",
+    "start_url": ".",
     "display": "standalone",
     "background_color": "#121212",
     "theme_color": "#121212",
     "orientation": "portrait",
     "icons": [
         {
-            "src": "assets/logo.png",
+            "src": "assets/logo/Olkkari-simple.png",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any maskable"
         },
         {
-            "src": "assets/logo.png",
+            "src": "assets/logo/Olkkari-simple.png",
             "sizes": "512x512",
             "type": "image/png"
         }
