@@ -1,11 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 export const ChatWidget: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const constraintRef = useRef(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     // Don't show on Splash, Welcome or Chat page itself
     const hiddenPaths = ['/', '/welcome', '/chat'];
@@ -15,8 +15,17 @@ export const ChatWidget: React.FC = () => {
         <motion.div
             drag
             dragMomentum={false}
+            onDragStart={() => setIsDragging(true)}
+            onDragEnd={() => {
+                // Short delay to prevent the tap event from firing immediately after drag ends
+                setTimeout(() => setIsDragging(false), 100);
+            }}
+            onTap={() => {
+                if (!isDragging) {
+                    navigate('/chat');
+                }
+            }}
             whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
-            onTap={() => navigate('/chat')}
             className="fixed top-24 right-4 z-[60] group cursor-pointer touch-none"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -24,7 +33,7 @@ export const ChatWidget: React.FC = () => {
         >
             <div className="relative">
                 <div className="absolute -inset-2 bg-accent-gold/20 rounded-full blur-lg group-hover:bg-accent-gold/40 transition-all duration-300"></div>
-                <div className="relative size-14 bg-primary rounded-full flex items-center justify-center text-accent-gold shadow-2xl border border-accent-gold/30 group-active:scale-90 transition-transform">
+                <div className="relative size-14 bg-primary rounded-full flex items-center justify-center text-accent-gold shadow-2xl border border-accent-gold/30 group-active:scale-95 transition-transform pointer-events-none">
                     <span className="material-symbols-outlined text-[32px]">smart_toy</span>
                     <div className="absolute -top-1 -right-1 size-4 bg-green-500 rounded-full border-2 border-primary"></div>
                 </div>
