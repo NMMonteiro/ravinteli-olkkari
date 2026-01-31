@@ -12,7 +12,7 @@ export const ChatWidget: React.FC = () => {
     return (
         <div
             onClick={() => navigate('/chat')}
-            className="fixed bottom-6 right-6 z-[60] group cursor-pointer"
+            className="fixed top-24 right-4 z-[60] group cursor-pointer"
         >
             <div className="relative">
                 <div className="absolute -inset-2 bg-accent-gold/20 rounded-full blur-lg group-hover:bg-accent-gold/40 transition-all duration-300"></div>
