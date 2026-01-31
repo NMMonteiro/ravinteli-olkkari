@@ -1,0 +1,92 @@
+[
+  {
+    "Category": "5-Course Menu",
+    "Dish Name": "5 Course Menu",
+    "Description": "Amuse Buse; Wonton duck tostada; Tuna tataki, chili jam, lemongrass; Pan-Seared White Fish & king oyster mushroom, kafir lime beurre blanc; Chateaubriand, dark pepper sauce, potato fondants; Banana cake, caramelized banana, miso ice cream; Chocolates",
+    "Price (€)": 79
+  },
+  {
+    "Category": "Starter",
+    "Dish Name": "Croquettes",
+    "Description": "Fried prawn croquettes, Caesar sauce, romaine",
+    "Price (€)": 13
+  },
+  {
+    "Category": "Starter",
+    "Dish Name": "Fried Japanese Style Chicken",
+    "Description": "Fried chicken with honey and chili oil, ranch style dressing (karaage)",
+    "Price (€)": 13
+  },
+  {
+    "Category": "Starter",
+    "Dish Name": "Grilled Cauliflower",
+    "Description": "Honey miso glaze, fried shallots, vegan tzatziki",
+    "Price (€)": 13
+  },
+  {
+    "Category": "Starter",
+    "Dish Name": "Tuna Tataki",
+    "Description": "Chili jam, lemongrass",
+    "Price (€)": 15
+  },
+  {
+    "Category": "Starter",
+    "Dish Name": "Smoked Whitefish Tartar",
+    "Description": "Light smoked whitefish, lime dressing, miso oil, Thai basil emulsion, smoked roe",
+    "Price (€)": 16
+  },
+  {
+    "Category": "Starter",
+    "Dish Name": "Wonton Duck",
+    "Description": "Confit duck leg wonton tostada, green curry sauce, Thai basil aioli, crispy onions, pickled cherry tomatoes, cucumber",
+    "Price (€)": 15
+  },
+  {
+    "Category": "Main",
+    "Dish Name": "Tagliatelle Ragu",
+    "Description": "Parmesan & Gouda cream, meat ragù, Parmesan",
+    "Price (€)": 29
+  },
+  {
+    "Category": "Main",
+    "Dish Name": "Duck & Cranberry",
+    "Description": "Brined and cold smoked duck breast, potato pave, sauerkraut, cranberry port wine sauce",
+    "Price (€)": 32
+  },
+  {
+    "Category": "Main",
+    "Dish Name": "Mushroom & Filo Pastry",
+    "Description": "Grilled mushroom sauce, Jerusalem artichoke purée, grilled vegetables",
+    "Price (€)": 28
+  },
+  {
+    "Category": "Main",
+    "Dish Name": "Chateaubriand",
+    "Description": "Meat jus, green pepper sauce, fondant potato",
+    "Price (€)": 37
+  },
+  {
+    "Category": "Main",
+    "Dish Name": "Pan-Seared White Fish",
+    "Description": "King oyster mushroom, broccolini, kafir lime beurre blanc",
+    "Price (€)": 35
+  },
+  {
+    "Category": "Dessert",
+    "Dish Name": "Apple Crumble",
+    "Description": "Classic apple crumble with vanilla ice cream",
+    "Price (€)": 9
+  },
+  {
+    "Category": "Dessert",
+    "Dish Name": "Chocolate Brownie",
+    "Description": "Rich brownie with raspberry, balsamic, beetroot",
+    "Price (€)": 9
+  },
+  {
+    "Category": "Dessert",
+    "Dish Name": "Baked Alaska",
+    "Description": "Espresso ice cream, brownie crumble, chocolate ganache",
+    "Price (€)": 11
+  }
+]

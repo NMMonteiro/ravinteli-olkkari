@@ -5,9 +5,10 @@ import { MenuItem, Wine } from '../types';
 import { Header } from '../components/Header';
 import { AnimatePresence, motion } from 'framer-motion';
 
-type Category = 'Food' | 'Drinks' | 'Wine';
+type Category = 'Food' | 'Cocktails' | 'Wine';
 
-const FOOD_SUBS = ['Starters', 'Mains', 'Desserts'];
+const FOOD_SUBS = ['Starter', 'Main', 'Dessert', '5-Course Menu'];
+const COCKTAIL_SUBS = ['Signature', 'Classic'];
 const WINE_SUBS = ['Red', 'White', 'Rose', 'Sparkling', 'Dessert'];
 
 interface MenuScreenProps {
@@ -16,7 +17,7 @@ interface MenuScreenProps {
 
 const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
   const [activeCategory, setActiveCategory] = useState<Category>('Food');
-  const [activeSubcategory, setActiveSubcategory] = useState<string>('Starters');
+  const [activeSubcategory, setActiveSubcategory] = useState<string>('Starter');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +27,8 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
 
   // Sync subcategory when main category changes
   useEffect(() => {
-    if (activeCategory === 'Food') setActiveSubcategory('Starters');
+    if (activeCategory === 'Food') setActiveSubcategory('Starter');
+    else if (activeCategory === 'Cocktails') setActiveSubcategory('Signature');
     else if (activeCategory === 'Wine') setActiveSubcategory('Red');
     else setActiveSubcategory('');
   }, [activeCategory]);
@@ -34,6 +36,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
+
       if (activeCategory === 'Wine') {
         let query = supabase.from('wines').select('id, name, year, region, type, subcategory, price_glass, price_bottle, description, image, isSommelierChoice:is_sommelier_choice');
 
@@ -45,20 +48,63 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
 
         if (error) console.error('Error fetching wines:', error);
         else setWines(data || []);
-      } else {
+      } else if (activeCategory === 'Cocktails') {
+        // Fetch from cocktails table
         let query = supabase
-          .from('menu_items')
-          .select('id, name, price, description, image, subcategory, isChefChoice:is_chef_choice, category')
-          .eq('category', activeCategory);
+          .from('cocktails')
+          .select('id, cocktail_name, price, method, image, category, is_signature, abv_notes, ingredients, garnish');
 
-        if (activeSubcategory && activeCategory === 'Food') {
-          query = query.eq('subcategory', activeSubcategory);
+        if (activeSubcategory) {
+          query = query.eq('category', activeSubcategory);
         }
 
         const { data, error } = await query.order('id', { ascending: true });
 
-        if (error) console.error('Error fetching menu:', error);
-        else setMenuItems(data || []);
+        if (error) console.error('Error fetching cocktails:', error);
+        else {
+          // Transform cocktail data to match MenuItem interface
+          const transformedData = (data || []).map(item => ({
+            id: item.id,
+            name: item.cocktail_name,
+            price: `${item.price}€`,
+            description: item.method,
+            image: item.image,
+            subcategory: item.category,
+            isChefChoice: item.is_signature,
+            abv_notes: item.abv_notes,
+            ingredients: item.ingredients,
+            garnish: item.garnish,
+            category: 'Cocktails' as const
+          }));
+          setMenuItems(transformedData);
+        }
+      } else {
+        // Fetch from food_menu table
+        let query = supabase
+          .from('food_menu')
+          .select('id, dish_name, price, description, image, category, is_chef_choice');
+
+        if (activeSubcategory) {
+          query = query.eq('category', activeSubcategory);
+        }
+
+        const { data, error } = await query.order('id', { ascending: true });
+
+        if (error) console.error('Error fetching food menu:', error);
+        else {
+          // Transform food data to match MenuItem interface
+          const transformedData = (data || []).map(item => ({
+            id: item.id,
+            name: item.dish_name,
+            price: `${item.price}€`,
+            description: item.description,
+            image: item.image,
+            subcategory: item.category,
+            isChefChoice: item.is_chef_choice,
+            category: 'Food' as const
+          }));
+          setMenuItems(transformedData);
+        }
       }
       setLoading(false);
     }
@@ -82,7 +128,7 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
       <div className="sticky top-[68px] z-30 bg-background-dark/95 backdrop-blur-md border-b border-white/5">
         <div className="px-4">
           <div className="flex justify-between">
-            {(['Food', 'Drinks', 'Wine'] as Category[]).map((cat) => (
+            {(['Food', 'Cocktails', 'Wine'] as Category[]).map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
@@ -99,10 +145,10 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
       </div>
 
       {/* Sub-Tabs */}
-      {(activeCategory === 'Food' || activeCategory === 'Wine') && (
+      {(activeCategory === 'Food' || activeCategory === 'Cocktails' || activeCategory === 'Wine') && (
         <div className="bg-background-dark/80 backdrop-blur-sm sticky top-[125px] z-20 py-3 border-b border-white/5 overflow-x-auto no-scrollbar">
           <div className="px-6 flex gap-6 justify-center">
-            {(activeCategory === 'Food' ? FOOD_SUBS : WINE_SUBS).map((sub) => (
+            {(activeCategory === 'Food' ? FOOD_SUBS : activeCategory === 'Cocktails' ? COCKTAIL_SUBS : WINE_SUBS).map((sub) => (
               <button
                 key={sub}
                 onClick={() => setActiveSubcategory(sub)}
@@ -351,6 +397,34 @@ const MenuScreen: React.FC<MenuScreenProps> = ({ onOpenMenu }) => {
                       </div>
                     </div>
                   )}
+
+                  {!isWine(selectedItem) && (selectedItem as MenuItem).category === 'Cocktails' && (
+                    <div className="space-y-4 py-4 border-t border-white/5">
+                      <div className="grid grid-cols-2 gap-4">
+                        {(selectedItem as MenuItem).abv_notes && (
+                          <div>
+                            <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold">Strength</span>
+                            <span className="text-sm font-bold text-accent-gold">{(selectedItem as MenuItem).abv_notes}</span>
+                          </div>
+                        )}
+                        {(selectedItem as MenuItem).garnish && (
+                          <div>
+                            <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold">Garnish</span>
+                            <span className="text-sm font-bold text-accent-gold">{(selectedItem as MenuItem).garnish}</span>
+                          </div>
+                        )}
+                      </div>
+                      {(selectedItem as MenuItem).ingredients && (
+                        <div>
+                          <span className="text-[10px] uppercase tracking-widest text-white/40 block font-bold mb-1">Ingredients</span>
+                          <p className="text-sm text-warm-ivory/80 leading-relaxed whitespace-pre-line font-montserrat">
+                            {(selectedItem as MenuItem).ingredients}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
 
                   {/* Chef's Choice - Food items only */}
                   {isFood(selectedItem) && (selectedItem as MenuItem).isChefChoice && (

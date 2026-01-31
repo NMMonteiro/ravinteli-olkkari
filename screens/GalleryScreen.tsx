@@ -100,7 +100,6 @@ const GalleryScreen: React.FC<GalleryScreenProps> = ({ onOpenMenu }) => {
                   <div className="flex items-end gap-3 justify-between mt-2">
                     <div className="flex flex-col gap-1">
                       <p className="text-primary/60 dark:text-[#bba0a2] text-sm font-normal leading-normal italic">{piece.medium}</p>
-                      <p className="text-primary dark:text-accent-gold text-lg font-bold leading-normal">{piece.price}</p>
                     </div>
                     <button className="flex min-w-[110px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-accent-gold hover:bg-accent-gold/90 text-white text-sm font-bold leading-normal shadow-md shadow-accent-gold/20">
                       <span className="truncate uppercase tracking-tight">Inquire</span>

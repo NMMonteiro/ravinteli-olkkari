@@ -7,7 +7,7 @@ import { MemberGate } from '../components/MemberGate';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
-type AdminView = 'dashboard' | 'menu' | 'wine' | 'staff' | 'events' | 'art' | 'bookings' | 'knowledge' | 'members';
+type AdminView = 'dashboard' | 'menu' | 'cocktails' | 'wine' | 'staff' | 'events' | 'art' | 'bookings' | 'knowledge' | 'members';
 
 interface AdminScreenProps {
   onOpenMenu: () => void;
@@ -40,7 +40,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     if (activeView === 'dashboard') return;
     setLoading(true);
     const tableMap: Record<string, string> = {
-      menu: 'menu_items',
+      menu: 'food_menu',
+      cocktails: 'cocktails',
       wine: 'wines',
       staff: 'staff',
       events: 'events',
@@ -109,7 +110,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
       });
     } else {
       setFormData({
-        category: activeView === 'wine' ? 'Wine' : 'Food',
+        category: activeView === 'wine' ? 'Wine' : activeView === 'cocktails' ? 'Cocktails' : 'Food',
         subcategory: '',
         is_chef_choice: false,
         is_tonight: false
@@ -130,6 +131,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     setUploading(true);
     const bucketMap: Record<string, string> = {
       menu: 'menu_images',
+      cocktails: 'menu_images',
       staff: 'staff_images',
       wine: 'menu_images',
       events: 'menu_images',
@@ -367,7 +369,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     setLoading(true);
 
     const tableMap: Record<string, string> = {
-      menu: 'menu_items',
+      menu: 'food_menu',
+      cocktails: 'cocktails',
       wine: 'wines',
       staff: 'staff',
       events: 'events',
@@ -380,7 +383,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
     // Explicitly define columns to save for each table to avoid payload errors
     const tableColumns: Record<string, string[]> = {
-      menu: ['name', 'price', 'description', 'image', 'is_chef_choice', 'category', 'subcategory'],
+      menu: ['dish_name', 'price', 'description', 'image', 'is_chef_choice', 'category'],
+      cocktails: ['cocktail_name', 'price', 'method', 'image', 'is_signature', 'category', 'abv_notes', 'ingredients', 'garnish'],
       wine: ['name', 'year', 'region', 'type', 'subcategory', 'price_glass', 'price_bottle', 'description', 'image', 'is_sommelier_choice'],
       staff: ['name', 'role', 'description', 'image', 'rate', 'badge'],
       events: ['title', 'date', 'time', 'description', 'image', 'type', 'is_tonight'],
@@ -397,6 +401,10 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
         dataToSave[col] = formData[col];
       }
       // Fallback mappings
+      else if (col === 'dish_name' && formData.name) dataToSave.dish_name = formData.name;
+      else if (col === 'cocktail_name' && (formData.name || formData.dish_name)) dataToSave.cocktail_name = formData.name || formData.dish_name;
+      else if (col === 'method' && formData.description) dataToSave.method = formData.description;
+      else if (col === 'is_signature' && formData.is_chef_choice !== undefined) dataToSave.is_signature = formData.is_chef_choice;
       else if (col === 'name' && formData.title) dataToSave.name = formData.title;
       else if (col === 'title' && formData.name) dataToSave.title = formData.name;
       else if (col === 'category' && activeView === 'knowledge' && formData.name) dataToSave.category = formData.name;
@@ -450,13 +458,35 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
         <form onSubmit={handleSubmit} className="space-y-4 pb-10">
           <div className="space-y-1">
             <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">
-              {activeView === 'knowledge' ? 'Topic / Category' : `Identity (DEBUG: ${activeView})`}
+              {activeView === 'knowledge' ? 'Topic / Category' :
+                activeView === 'menu' ? 'Dish Name' :
+                  activeView === 'cocktails' ? 'Cocktail Name' :
+                    activeView === 'wine' ? 'Wine Name' :
+                      activeView === 'events' ? 'Event Title' :
+                        activeView === 'staff' ? 'Staff Name' :
+                          activeView === 'bookings' ? 'Customer Name' :
+                            activeView === 'art' ? 'Artwork Title' : 'Name'}
             </label>
             <input
               type="text"
               className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
-              value={formData.name || formData.title || formData.category || ''}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value, title: e.target.value, category: e.target.value })}
+              value={
+                activeView === 'menu' ? (formData.dish_name || '') :
+                  activeView === 'cocktails' ? (formData.cocktail_name || '') :
+                    activeView === 'bookings' ? (formData.customer_name || '') :
+                      (formData.name || formData.title || formData.category || '')
+              }
+              onChange={(e) => {
+                if (activeView === 'menu') {
+                  setFormData({ ...formData, dish_name: e.target.value });
+                } else if (activeView === 'cocktails') {
+                  setFormData({ ...formData, cocktail_name: e.target.value });
+                } else if (activeView === 'bookings') {
+                  setFormData({ ...formData, customer_name: e.target.value });
+                } else {
+                  setFormData({ ...formData, name: e.target.value, title: e.target.value, category: e.target.value });
+                }
+              }}
               required
             />
           </div>
@@ -464,9 +494,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           {activeView !== 'knowledge' && (
             <div className="space-y-1">
               <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Visual Asset</label>
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-4 items-start">
                 {formData.image && (
-                  <div className="size-20 rounded-2xl bg-cover bg-center border border-white/10 flex-none" style={{ backgroundImage: `url("${formData.image}")` }}></div>
+                  <div className="flex flex-col gap-2">
+                    <div className="w-40 h-40 rounded-2xl bg-cover bg-center border-2 border-accent-gold/30 flex-none shadow-lg" style={{ backgroundImage: `url("${formData.image}")` }}></div>
+                    <p className="text-[8px] text-white/40 font-mono truncate max-w-[160px]" title={formData.image}>
+                      {formData.image.split('/').pop()}
+                    </p>
+                  </div>
                 )}
                 <label className="flex-1 cursor-pointer bg-white/5 border border-dashed border-white/20 rounded-2xl h-20 flex flex-col items-center justify-center text-white/30 hover:bg-white/10 transition-colors group">
                   <span className="material-symbols-outlined mb-1 group-hover:scale-110 transition-transform">cloud_upload</span>
@@ -516,77 +551,180 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             )}
 
             {activeView === 'menu' ? (
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
-                <div className="relative">
-                  <select
-                    className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
-                    value={formData.category || 'Food'}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: '' })}
-                  >
-                    <option value="Food" className="bg-[#1d1516] text-white">Food</option>
-                    <option value="Drinks" className="bg-[#1d1516] text-white">Drinks</option>
-                    <option value="Wine" className="bg-[#1d1516] text-white">Wine</option>
-                  </select>
-                  <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value="Food"
+                      disabled
+                    >
+                      <option value="Food" className="bg-[#1d1516] text-white">Food</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
                 </div>
-              </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Subcategory</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value={formData.category || 'Starter'}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    >
+                      <option value="Starter" className="bg-[#1d1516] text-white">Starter</option>
+                      <option value="Main" className="bg-[#1d1516] text-white">Main Course</option>
+                      <option value="Dessert" className="bg-[#1d1516] text-white">Dessert</option>
+                      <option value="5-Course Menu" className="bg-[#1d1516] text-white">5-Course Menu</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+              </>
+            ) : activeView === 'cocktails' ? (
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value="Cocktails"
+                      disabled
+                    >
+                      <option value="Cocktails" className="bg-[#1d1516] text-white">Cocktails</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Subcategory</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value={formData.category || 'Signature'}
+                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    >
+                      <option value="Signature" className="bg-[#1d1516] text-white">Signature</option>
+                      <option value="Classic" className="bg-[#1d1516] text-white">Classic</option>
+                      <option value="Mocktail" className="bg-[#1d1516] text-white">Mocktail</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">ABV / Strength Notes</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                        value={formData.abv_notes || ''}
+                        placeholder="e.g. High ABV, 0%"
+                        onChange={(e) => setFormData({ ...formData, abv_notes: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Garnish</label>
+                      <input
+                        type="text"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                        value={formData.garnish || ''}
+                        placeholder="e.g. Lime wedge"
+                        onChange={(e) => setFormData({ ...formData, garnish: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Ingredients (Detailed)</label>
+                    <textarea
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white focus:border-accent-gold outline-none h-24 resize-none text-base"
+                      value={formData.ingredients || ''}
+                      placeholder="List all ingredients and measurements..."
+                      onChange={(e) => setFormData({ ...formData, ingredients: e.target.value })}
+                    ></textarea>
+                  </div>
+                </div>
+              </>
+            ) : activeView === 'wine' ? (
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Category</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value="Wine"
+                      disabled
+                    >
+                      <option value="Wine" className="bg-[#1d1516] text-white">Wine</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Subcategory (Wine Type)</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value={formData.subcategory || formData.type || ''}
+                      onChange={(e) => setFormData({ ...formData, subcategory: e.target.value, type: e.target.value })}
+                    >
+                      <option value="" className="bg-[#1d1516] text-white">Select Wine Type</option>
+                      <option value="Red" className="bg-[#1d1516] text-white">Red</option>
+                      <option value="White" className="bg-[#1d1516] text-white">White</option>
+                      <option value="Rose" className="bg-[#1d1516] text-white">Rosé</option>
+                      <option value="Sparkling" className="bg-[#1d1516] text-white">Sparkling</option>
+                      <option value="Dessert" className="bg-[#1d1516] text-white">Dessert Wine</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+              </>
             ) : activeView === 'events' ? (
-              <div className="space-y-1">
-                <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Event Date</label>
-                <input
-                  type="text"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
-                  value={formData.date || ''}
-                  placeholder="Oct 31"
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                />
-              </div>
+              <>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Event Date</label>
+                  <input
+                    type="text"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base"
+                    value={formData.date || ''}
+                    placeholder="Oct 31"
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Event Type / Category</label>
+                  <div className="relative">
+                    <select
+                      className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
+                      value={formData.type || ''}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      required
+                    >
+                      <option value="" className="bg-[#1d1516] text-white">Select Type</option>
+                      <option value="Music" className="bg-[#1d1516] text-white">Music</option>
+                      <option value="Tastings" className="bg-[#1d1516] text-white">Tastings</option>
+                      <option value="Others" className="bg-[#1d1516] text-white">Others</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
+                  </div>
+                </div>
+              </>
             ) : null}
           </div>
 
-          {(formData.category === 'Food' || formData.category === 'Wine') && (
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Sub-Category Selection</label>
-              <div className="relative">
-                <select
-                  className="w-full bg-[#2a1f20] border border-white/10 rounded-2xl h-14 px-5 text-white focus:border-accent-gold outline-none text-base appearance-none"
-                  value={formData.subcategory || ''}
-                  onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                >
-                  <option value="" className="bg-[#1d1516] text-white">None (Global)</option>
-                  {formData.category === 'Food' && (
-                    <>
-                      <option value="Starters" className="bg-[#1d1516] text-white">Starters</option>
-                      <option value="Mains" className="bg-[#1d1516] text-white">Mains</option>
-                      <option value="Desserts" className="bg-[#1d1516] text-white">Desserts</option>
-                    </>
-                  )}
-                  {formData.category === 'Wine' && (
-                    <>
-                      <option value="Red" className="bg-[#1d1516] text-white">Red Wine</option>
-                      <option value="White" className="bg-[#1d1516] text-white">White Wine</option>
-                      <option value="Rose" className="bg-[#1d1516] text-white">Rosé Wine</option>
-                      <option value="Sparkling" className="bg-[#1d1516] text-white">Sparkling / Champagne</option>
-                      <option value="Dessert" className="bg-[#1d1516] text-white">Dessert Wine</option>
-                    </>
-                  )}
-                </select>
-                <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none">expand_more</span>
-              </div>
-            </div>
-          )}
-
-          {activeView === 'menu' && formData.category === 'Food' && (
+          {(activeView === 'menu' || activeView === 'cocktails') && (
             <div className="flex items-center gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
               <input
                 type="checkbox"
-                id="chefchoice"
-                className="size-5 rounded border-white/10 bg-white/5 text-accent-gold focus:ring-accent-gold accent-gold"
-                checked={!!formData.is_chef_choice}
-                onChange={(e) => setFormData({ ...formData, is_chef_choice: e.target.checked })}
+                id="is_chef_choice"
+                className="w-5 h-5 rounded border-white/10 bg-white/5 text-accent-gold focus:ring-accent-gold"
+                checked={formData.is_chef_choice || formData.is_signature || false}
+                onChange={(e) => setFormData({ ...formData, is_chef_choice: e.target.checked, is_signature: e.target.checked })}
               />
-              <label htmlFor="chefchoice" className="text-xs font-bold uppercase tracking-widest text-white/70">Mark as Chef's Choice</label>
+              <label htmlFor="is_chef_choice" className="text-sm text-white/60 font-medium">
+                {activeView === 'cocktails' ? 'Signature Cocktail Selection' : 'Chef\'s Choice Highlight'}
+              </label>
             </div>
           )}
 
@@ -628,11 +766,19 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           )}
 
           <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">Contextual Information</label>
+            <label className="text-[10px] uppercase font-bold text-accent-gold tracking-widest px-1">
+              {activeView === 'cocktails' ? 'Method / Mixology Notes' : 'Contextual Information'}
+            </label>
             <textarea
               className="w-full bg-white/5 border border-white/10 rounded-2xl p-5 text-white focus:border-accent-gold outline-none h-32 resize-none text-base"
-              value={formData.description || formData.content || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value, content: e.target.value })}
+              value={formData.description || formData.content || formData.method || ''}
+              onChange={(e) => {
+                if (activeView === 'cocktails') {
+                  setFormData({ ...formData, method: e.target.value, description: e.target.value });
+                } else {
+                  setFormData({ ...formData, description: e.target.value, content: e.target.value });
+                }
+              }}
             ></textarea>
           </div>
 
@@ -644,8 +790,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
             {loading ? 'Processing...' : 'Sync with Archive'}
           </button>
         </form>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 
   const renderSuggestionModal = () => (
@@ -757,7 +903,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[
-            { id: 'menu', label: 'Menu Items', icon: 'restaurant_menu' },
+            { id: 'menu', label: 'Food Menu', icon: 'restaurant_menu' },
+            { id: 'cocktails', label: 'Cocktails', icon: 'local_bar' },
             { id: 'wine', label: 'Wine Cellar', icon: 'wine_bar' },
             { id: 'staff', label: 'Staff Hire', icon: 'supervisor_account' },
             { id: 'events', label: 'Live Events', icon: 'celebration' },
@@ -787,6 +934,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
     const filteredItems = items.filter(item => {
       const matchesSearch = (
         (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.dish_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.customer_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (item.category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -794,13 +942,20 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
         (item.description || '').toLowerCase().includes(searchQuery.toLowerCase())
       );
 
-      const matchesSubcategory = !subcategoryFilter || item.subcategory === subcategoryFilter;
+      // For menu items, subcategory is stored in the 'category' column
+      const itemSubcategory = activeView === 'menu' ? item.category :
+        activeView === 'cocktails' ? item.category :
+          activeView === 'events' ? item.type :
+            item.subcategory;
+      const matchesSubcategory = !subcategoryFilter || itemSubcategory === subcategoryFilter;
 
       return matchesSearch && matchesSubcategory;
     });
 
-    const subcategories = activeView === 'menu' ? ['Starters', 'Mains', 'Desserts'] :
-      activeView === 'wine' ? ['Red', 'White', 'Rose', 'Sparkling', 'Dessert'] : [];
+    const subcategories = activeView === 'menu' ? ['Starter', 'Main', 'Dessert', '5-Course Menu'] :
+      activeView === 'cocktails' ? ['Signature', 'Classic', 'Mocktail'] :
+        activeView === 'wine' ? ['Red', 'White', 'Rose', 'Sparkling', 'Dessert'] :
+          activeView === 'events' ? ['Music', 'Tastings', 'Others'] : [];
 
     return (
       <div className="px-6 py-4 space-y-6">
@@ -866,13 +1021,16 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20 max-w-7xl mx-auto">
             {filteredItems.map((item) => (
               <div key={item.id} className="flex flex-col gap-4 bg-card-dark p-6 rounded-[2.5rem] border border-white/5 shadow-xl group animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                  {item.image && (
+                    <div className="w-20 h-20 rounded-2xl bg-cover bg-center border border-white/10 flex-none shadow-inner" style={{ backgroundImage: `url("${item.image}")` }}></div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-accent-gold mb-1">
-                      {activeView === 'bookings' ? 'Table Inquiry' : (item.subcategory || item.role || 'Registry Entry')}
+                      {activeView === 'bookings' ? 'Table Inquiry' : (item.type || item.category || item.subcategory || item.role || 'Registry Entry')}
                     </p>
                     <h4 className="text-white text-xl font-black italic uppercase tracking-tighter truncate leading-tight">
-                      {item.customer_name || item.name || item.title || item.full_name || 'Anonymous Guest'}
+                      {item.customer_name || item.dish_name || item.cocktail_name || item.name || item.title || item.full_name || 'Anonymous Guest'}
                     </h4>
                     <p className="text-white/30 text-[9px] font-black tracking-widest uppercase mt-1 truncate">
                       {item.email}
@@ -886,7 +1044,7 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onOpenMenu }) => {
                       </div>
                     )}
                   </div>
-                  {activeView !== 'wine' && (
+                  {activeView === 'bookings' && (
                     <div className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest border backdrop-blur-md ${item.status === 'Confirmed' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
                       item.status === 'Refused' ? 'bg-red-500/10 text-red-500 border-red-500/20' :
                         'bg-accent-gold/10 text-accent-gold border-accent-gold/20'

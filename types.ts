@@ -8,6 +8,10 @@ export interface MenuItem {
   image: string;
   subcategory?: string;
   isChefChoice?: boolean;
+  abv_notes?: string;
+  ingredients?: string;
+  garnish?: string;
+  category?: 'Food' | 'Cocktails';
 }
 
 export interface EventItem {

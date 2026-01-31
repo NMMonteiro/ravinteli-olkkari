@@ -1,0 +1,106 @@
+[
+  {
+    "Category": "Signature",
+    "Cocktail": "Royal Daiquiri / Champagne Daiquiri",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Bayou White Rum\n1cl Havana Club 3\n1cl Yuzu Curacao\n3cl Lime\n2cl Champagne Syrup\n3 dash Saline",
+    "Method": "Shake all ingredients with ice for ~15s. Double strain into a chilled Nick & Nora glass. Express lime oil.",
+    "Garnish": "Lime wedge"
+  },
+  {
+    "Category": "Signature",
+    "Cocktail": "Lucifer's Margarita / Deliv's Margarita (High ABV)",
+    "ABV / Notes": "High ABV",
+    "Ingredients": "4cl Tequila Blanco Sierra\n1.5cl Ancho Reyes\n1.5cl Dry Orange Curacao\n3cl Barbera d'Asti (FLOAT)\n3cl Lime\n1cl Agave\n3 dash Saline",
+    "Method": "Add all ingredients except the red wine. Add ice and shake 10–15s. Double strain into a chilled rocks glass with Himalayan salt. Add fresh ice, then add red wine as a float (or let guest do it).",
+    "Garnish": "Whole chili + dehydrated lime wheel"
+  },
+  {
+    "Category": "Signature",
+    "Cocktail": "Harvey Pearson",
+    "ABV / Notes": "Can be made into mocktail",
+    "Ingredients": "4cl Tanqueray Gin\n1cl Galliano\n1cl Belle Pear Liqueur\n1cl Orgeat (sweet almond milk with rose water)\n1cl Passion Syrup\n2cl Lemon juice\n6–8cl Orange juice (freshly squeezed, TOP UP)\n3 dash Saline\n3 dash Walnut bitters",
+    "Method": "Add all ingredients except orange juice into a chilled highball glass with ice. Top up with orange juice and stir well.",
+    "Garnish": "Caramelized orange wedge"
+  },
+  {
+    "Category": "Signature",
+    "Cocktail": "Mojo Jojo Sour",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Plantaray (Plantation) Pineapple Rum\n2cl Belle Pear Liqueur\n3cl Pineapple juice\n3cl Lime\n2cl Honey syrup\n2cl Egg white (or vegan foamer)\n6–9 Mint leaves\n3 dash Saline",
+    "Method": "Add all ingredients into a shaker. Dry shake ~10s, then add ice and wet shake. Double strain into a chilled coupe glass.",
+    "Garnish": "Garnish TBD (edible)"
+  },
+  {
+    "Category": "Signature",
+    "Cocktail": "Jungle Booby (High ABV)",
+    "ABV / Notes": "High ABV",
+    "Ingredients": "4cl Sierra Tequila Blanco\n2cl Mezcal Ilegal Joven\n2cl Campari\n3cl Pineapple juice\n3cl Grapefruit juice\n2cl Lime juice\n2cl Orgeat\n4 dash Absinth\n4 dash Peychaud bitters (FLOAT)",
+    "Method": "Add all ingredients except Peychaud bitters into a shaker with ice. Hard shake and double strain into a chilled tiki mug with crushed ice.",
+    "Garnish": "Pineapple slice + pineapple leaves; top with Peychaud bitters; straw"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Old Fashioned (A.K.A The Godfather)",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Bulleit Bourbon\n2cl Bulleit Rye\n1 barspoon Demerara syrup\n4 dash Angostura bitters\n2 dash Saline\n1 dash Orange bitters",
+    "Method": "Stir all ingredients in a mixing glass with ice. Stir 20–30s and strain into a chilled rocks glass with Nordic ice block. (Optional: add orange peel during stirring.)",
+    "Garnish": "Orange peel twist"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Negroni",
+    "ABV / Notes": null,
+    "Ingredients": "2cl Hendricks Gin\n2cl Sweet Vermouth\n2cl Campari\n3 dash Orange bitters\n2 dash Saline",
+    "Method": "Add all ingredients into a mixing glass with lots of ice. Stir 20–30s and strain into a chilled rocks glass.",
+    "Garnish": "Orange oils + half orange wheel"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Hendricks GT",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Hendricks Gin\n3 dash Saline\nTonic water (top up)",
+    "Method": "Build in a wine glass with ice. Top up with tonic water and stir well.",
+    "Garnish": "Cucumber + black pepper"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "The Last Word",
+    "ABV / Notes": null,
+    "Ingredients": "2cl Green Chartreuse\n2cl Maraschino liqueur\n2cl Hendricks Gin\n2cl Lime juice\n3 dash Saline",
+    "Method": "Shake with ice and double strain into a chilled Nick & Nora glass.",
+    "Garnish": "Express lime oil + maraschino cherry"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Mai Tai",
+    "ABV / Notes": null,
+    "Ingredients": "3cl Plantaray (Plantation) Pineapple Rum\n2cl Bayou Spiced Rum\n1cl Plantaray OFTD Rum (FLOAT)\n2cl Dry Orange Curacao\n3cl Lime\n2cl Orgeat\n1cl Simple syrup\n4 dash Saline",
+    "Method": "Shake all ingredients except OFTD rum with ice ~10s. Double strain into a tiki mug. Top up crushed ice. Add straw. Float OFTD on top.",
+    "Garnish": "Fresh mint + dehydrated lime wheel. Optional: ignite OFTD on lime wheel and dust cinnamon over flame."
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Martini / Dirty Martini",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Hendricks Gin\n2cl Dry Vermouth\n4 dash Saline\nDirty: add 3cl Olive brine",
+    "Method": "Stir in a mixing glass with lots of ice ~30s and strain into a martini glass.",
+    "Garnish": "Express lemon oil + 2 olives"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Espresso Martini",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Strolli Caramel Vodka\n2cl Kahlua\n1 shot Espresso\n1cl Galliano\n1cl Simple syrup\n4 dash Saline\n4 dash Chocolate bitters",
+    "Method": "Shake with ice ~15s and double strain into a martini glass.",
+    "Garnish": "3 coffee beans"
+  },
+  {
+    "Category": "Classic",
+    "Cocktail": "Whiskey Sour",
+    "ABV / Notes": null,
+    "Ingredients": "4cl Wild Turkey Bourbon\n2cl Lemon\n2cl Egg white (or vegan foamer)\n1cl Simple syrup\n4 dash Angostura\n2 dash Orange bitters\n4 dash Saline",
+    "Method": "Dry shake 10–15s (no ice), then add ice and wet shake ~10s. Double strain into a chilled rocks glass.",
+    "Garnish": "Orange oil + fresh orange peel twist"
+  }
+]
